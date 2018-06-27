@@ -23,9 +23,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.crashlytics.android.Crashlytics;
-
-import net.ouftech.whobringswhat.commons.Logger;
+import net.ouftech.whobringswhat.model.FirestoreManager;
 
 import io.fabric.sdk.android.Fabric;
 
@@ -35,13 +33,20 @@ public class EventsListActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_events_list);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        Fabric.with(this, new Crashlytics());
+        init();
+
         FloatingActionButton fab =  findViewById(R.id.fab);
         fab.setOnClickListener(view ->
-                Logger.e("blavl", "test", new Exception()));
+                FirestoreManager.test());
+    }
+
+    private void init() {
+        Fabric.with(this);
+
+        FirestoreManager.init();
     }
 
     @Override
