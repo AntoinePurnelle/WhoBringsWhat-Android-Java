@@ -41,7 +41,8 @@ public class FirestoreManager {
         //testFetch();
         //testFetchEventById();
         //testAddUser();
-        testAddEvent();
+        //testAddEvent();
+        testAddContribution();
     }
 
     public static void testAddUser() {
@@ -76,7 +77,7 @@ public class FirestoreManager {
                 db.collection(USERS_COLLECTIONS_NAME).document("apu+user2@ouftech.net")
         );
 
-        saveEvent(event, new AddListener() {
+        addEvent(event, new AddListener() {
             @Override
             public void onSuccess(Void aVoid) {
                 Logger.d(getLogTag(), "Event created with success!");
@@ -98,7 +99,42 @@ public class FirestoreManager {
 
             @Override
             public void onFailure(Exception e) {
-                Logger.e(getLogTag(), "Error while fetching event", e);
+                Logger.e(getLogTag(), "Error while adding event", e);
+            }
+        });
+    }
+
+
+    public static void testAddContribution() {
+        fetchEventById("YiOGGEI2xY2PElnZZstg", new EventQueryListener() {
+            @Override
+            public void onSuccess(@Nullable Event event) {
+                Logger.d(getLogTag(), event.toString());
+
+                Contribution contribution = new Contribution(
+                        "Contrib 1 E3",
+                        11, 11, "plates",
+                        "main",
+                        "Comment C1E3",
+                        db.collection(USERS_COLLECTIONS_NAME).document("apu+user2@ouftech.net")
+                );
+
+                addContribution(event, contribution, new AddListener() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Logger.d(getLogTag(), contribution.toString());
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        Logger.e(getLogTag(), "Error while adding contribution", e);
+                    }
+                });
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Logger.e(getLogTag(), "Error while adding event", e);
             }
         });
     }
@@ -243,12 +279,24 @@ public class FirestoreManager {
                 .addOnFailureListener(listener::onFailure);
     }
 
-    public static void saveEvent(@NonNull Event event, @NonNull AddListener listener) {
+    public static void addEvent(@NonNull Event event, @NonNull AddListener listener) {
         DocumentReference documentReference = db.collection(EVENTS_COLLECTIONS_NAME).document();
         event.setId(documentReference.getId());
 
         documentReference
                 .set(event)
+                .addOnSuccessListener(listener::onSuccess)
+                .addOnFailureListener(listener::onFailure);
+    }
+
+    public static void addContribution(@NonNull Event event, @NonNull Contribution contribution, @NonNull AddListener listener) {
+        DocumentReference documentReference = db
+                .collection(EVENTS_COLLECTIONS_NAME).document(event.getId())
+                .collection(CONTRIBUTIONS_COLLECTIONS_NAME).document();
+        contribution.setId(documentReference.getId());
+
+        documentReference
+                .set(contribution)
                 .addOnSuccessListener(listener::onSuccess)
                 .addOnFailureListener(listener::onFailure);
     }

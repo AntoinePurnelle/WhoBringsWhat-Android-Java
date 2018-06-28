@@ -48,6 +48,16 @@ public class Contribution {
         this.user = user;
     }
 
+    public Contribution(String name, int servings, int quantity, @Nullable String unit, String type, @Nullable String comment, DocumentReference user) {
+        this.name = name;
+        this.servings = servings;
+        this.quantity = quantity;
+        this.unit = unit;
+        this.type = type;
+        this.comment = comment;
+        this.user = user;
+    }
+
     public static Contribution fromDocument(DocumentSnapshot documentSnapshot) {
         Contribution contribution = documentSnapshot.toObject(Contribution.class);
         contribution.id = documentSnapshot.getId();
