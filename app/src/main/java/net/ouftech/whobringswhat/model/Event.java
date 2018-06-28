@@ -23,7 +23,6 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 
-import java.util.Date;
 import java.util.Map;
 
 public class Event {
@@ -34,9 +33,9 @@ public class Event {
     private String name;
     @Nullable
     private String description;
-    private Date time;
+    private long time;
     @Nullable
-    private Date endTime;
+    private long endTime;
     @Nullable
     private String location;
     private int servings;
@@ -50,14 +49,14 @@ public class Event {
     @Nullable
     private String budgetCurrency;
     private CollectionReference contributions;
-    private Map<String, Boolean> users;
+    private Map<String, Long> users;
     private DocumentReference owner; // User
 
     public Event() {
 
     }
 
-    public Event(String id, String name, @Nullable String description, Date time, @Nullable Date endTime, @Nullable String location, int servings, boolean appetizer, boolean starter, boolean main, boolean dessert, @Nullable String type, float budget, @Nullable String budgetCurrency, CollectionReference contributions, Map<String, Boolean> users, DocumentReference owner) {
+    public Event(String id, String name, @Nullable String description, long time, long endTime, @Nullable String location, int servings, boolean appetizer, boolean starter, boolean main, boolean dessert, @Nullable String type, float budget, @Nullable String budgetCurrency, CollectionReference contributions, Map<String, Long> users, DocumentReference owner) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -108,20 +107,20 @@ public class Event {
         this.description = description;
     }
 
-    public Date getTime() {
+    public long getTime() {
         return time;
     }
 
-    public void setTime(Date time) {
+    public void setTime(long time) {
         this.time = time;
     }
 
     @Nullable
-    public Date getEndTime() {
+    public long getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(@Nullable Date endTime) {
+    public void setEndTime(@Nullable long endTime) {
         this.endTime = endTime;
     }
 
@@ -208,11 +207,11 @@ public class Event {
         this.contributions = contributions;
     }
 
-    public Map<String, Boolean> getUsers() {
+    public Map<String, Long> getUsers() {
         return users;
     }
 
-    public void setUsers(Map<String, Boolean> users) {
+    public void setUsers(Map<String, Long> users) {
         this.users = users;
     }
 
@@ -226,24 +225,24 @@ public class Event {
 
     @Override
     public String toString() {
-        return "Event{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' +
-                ", time=" + time +
-                ", endTime=" + endTime +
-                ", location='" + location + '\'' +
-                ", servings=" + servings +
-                ", appetizer=" + appetizer +
-                ", starter=" + starter +
-                ", main=" + main +
-                ", dessert=" + dessert +
-                ", type='" + type + '\'' +
-                ", budget=" + budget +
-                ", budgetCurrency='" + budgetCurrency + '\'' +
-                ", contributions=" + contributions +
-                ", users=" + users +
-                ", owner=" + owner +
-                '}';
+        return "Event{\n" +
+                " id='" + id + '\'' +
+                ",\n name='" + name + '\'' +
+                ",\n description='" + description + '\'' +
+                ",\n time=" + time +
+                ",\n endTime=" + endTime +
+                ",\n location='" + location + '\'' +
+                ",\n servings=" + servings +
+                ",\n appetizer=" + appetizer +
+                ",\n starter=" + starter +
+                ",\n main=" + main +
+                ",\n dessert=" + dessert +
+                ",\n type='" + type + '\'' +
+                ",\n budget=" + budget +
+                ",\n budgetCurrency='" + budgetCurrency + '\'' +
+                ",\n contributions=" + contributions +
+                ",\n users=" + users +
+                ",\n owner=" + owner.getId() +
+                "\n}";
     }
 }

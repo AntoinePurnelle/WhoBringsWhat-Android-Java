@@ -88,10 +88,10 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", emailAddress='" + emailAddress + '\'' +
-                ", firebaseAuthIdToken='" + firebaseAuthIdToken + '\'' +
-                '}';
+                "\n id='" + id + '\'' +
+                ",\n name='" + name + '\'' +
+                ",\n emailAddress='" + emailAddress + '\'' +
+                ",\n firebaseAuthIdToken='" + firebaseAuthIdToken + '\'' +
+                "\n}";
     }
 }

@@ -18,6 +18,7 @@ public class FirestoreManager {
 
     public static final String USERS_COLLECTIONS_NAME = "users";
     public static final String EVENTS_COLLECTIONS_NAME = "events";
+    public static final String CONTRIBUTIONS_COLLECTIONS_NAME = "contributions";
 
     private static FirebaseFirestore db;
 
@@ -39,8 +40,13 @@ public class FirestoreManager {
                 Logger.d(getLogTag(), user.toString());
 
                 fetchEventsForUser(user, events -> {
-                    if (events != null)
+                    if (events != null) {
                         Logger.d(getLogTag(), Arrays.toString(events.toArray()));
+
+                        fetchContributionsForEvent(events.get(1), contributions -> {
+                            Logger.d(getLogTag(), Arrays.toString(contributions.toArray()));
+                        });
+                    }
                 });
             }
         });
@@ -75,7 +81,8 @@ public class FirestoreManager {
 
     public static void fetchEventsForUser(@NonNull User user, @NonNull EventsQueryListener listener) {
         db.collection(EVENTS_COLLECTIONS_NAME)
-                .whereEqualTo(Event.USERS_FIELD + "." + user.getId(), true)
+                .whereGreaterThan(Event.USERS_FIELD + "." + user.getId(), 0)
+                .orderBy(Event.USERS_FIELD + "." + user.getId())
                 .get()
                 .addOnCompleteListener(eventsTask -> {
                     List<Event> eventList = null;
@@ -98,12 +105,39 @@ public class FirestoreManager {
                 });
     }
 
+    public static void fetchContributionsForEvent(@NonNull Event event, @NonNull ContributionsQueryListener listener) {
+        db.collection(EVENTS_COLLECTIONS_NAME + "/" + event.getId() + "/" + CONTRIBUTIONS_COLLECTIONS_NAME).get().addOnCompleteListener(contributionsTask -> {
+            List<Contribution> contributionsList = null;
+
+            if (contributionsTask.isSuccessful()) {
+                QuerySnapshot contributionsQuerySnapshot = contributionsTask.getResult();
+
+                contributionsList = new ArrayList<>();
+
+                for (DocumentSnapshot contributionsDocumentSnapshot : contributionsQuerySnapshot) {
+                    Contribution contribution = Contribution.fromDocument(contributionsDocumentSnapshot);
+                    contributionsList.add(contribution);
+                }
+
+            } else {
+                Logger.w(getLogTag(), "Error getting events documents: ", contributionsTask.getException());
+            }
+
+            listener.onContributionsFetched(contributionsList);
+        });
+    }
+
+
     public interface UserQueryListener {
         void onUserFetched(@Nullable User user);
     }
 
     public interface EventsQueryListener {
         void onEventsFetched(@Nullable List<Event> events);
+    }
+
+    public interface ContributionsQueryListener {
+        void onContributionsFetched(@Nullable List<Contribution> contributions);
     }
 
     public static String getLogTag() {

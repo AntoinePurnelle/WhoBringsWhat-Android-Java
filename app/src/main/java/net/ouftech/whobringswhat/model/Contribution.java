@@ -18,6 +18,7 @@ package net.ouftech.whobringswhat.model;
 
 import android.support.annotation.Nullable;
 
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 public class Contribution {
@@ -31,12 +32,12 @@ public class Contribution {
     private String type;
     @Nullable
     private String comment ;
-    private DocumentSnapshot user;
+    private DocumentReference user;
 
     public Contribution() {
     }
 
-    public Contribution(String id, String name, int servings, int quantity, @Nullable String unit, String type, @Nullable String comment, DocumentSnapshot user) {
+    public Contribution(String id, String name, int servings, int quantity, @Nullable String unit, String type, @Nullable String comment, DocumentReference user) {
         this.id = id;
         this.name = name;
         this.servings = servings;
@@ -47,17 +48,89 @@ public class Contribution {
         this.user = user;
     }
 
+    public static Contribution fromDocument(DocumentSnapshot documentSnapshot) {
+        Contribution contribution = documentSnapshot.toObject(Contribution.class);
+        contribution.id = documentSnapshot.getId();
+        return contribution;
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getServings() {
+        return servings;
+    }
+
+    public void setServings(int servings) {
+        this.servings = servings;
+    }
+
+    public int getQuantity() {
+        return quantity;
+    }
+
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
+    }
+
+    @Nullable
+    public String getUnit() {
+        return unit;
+    }
+
+    public void setUnit(@Nullable String unit) {
+        this.unit = unit;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    @Nullable
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(@Nullable String comment) {
+        this.comment = comment;
+    }
+
+    public DocumentReference getUser() {
+        return user;
+    }
+
+    public void setUser(DocumentReference user) {
+        this.user = user;
+    }
+
     @Override
     public String toString() {
         return "Contribution{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", servings=" + servings +
-                ", quantity=" + quantity +
-                ", unit='" + unit + '\'' +
-                ", type='" + type + '\'' +
-                ", comment='" + comment + '\'' +
-                ", user=" + user +
-                '}';
+                "\n id='" + id + '\'' +
+                ",\n name='" + name + '\'' +
+                ",\n servings=" + servings +
+                ",\n quantity=" + quantity +
+                ",\n unit='" + unit + '\'' +
+                ",\n type='" + type + '\'' +
+                ",\n comment='" + comment + '\'' +
+                ",\n user=" + user.getId() +
+                "\n}";
     }
 }
