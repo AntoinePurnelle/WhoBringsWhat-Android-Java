@@ -242,7 +242,7 @@ public class Event {
                 ",\n budgetCurrency='" + budgetCurrency + '\'' +
                 ",\n contributions=" + contributions +
                 ",\n users=" + users +
-                ",\n owner=" + owner.getId() +
+                ",\n owner=" + (owner != null ? owner.getId() : "null") +
                 "\n}";
     }
 }

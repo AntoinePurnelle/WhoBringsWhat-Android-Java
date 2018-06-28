@@ -16,49 +16,26 @@
 
 package net.ouftech.whobringswhat.model;
 
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-
-import java.util.List;
 
 public class User {
 
     public static final String EMAIL_ADDRESS_FIELD = "emailAddress";
-    public static final String EVENTS_FIELD = "events";
 
-    private String id;
-    private String name;
     private String emailAddress;
+    private String name;
     private String firebaseAuthIdToken;
 
     public User(){}
 
-    public User(String id, String name, String emailAddress, String firebaseAuthIdToken) {
-        this.id = id;
-        this.name = name;
-        this.emailAddress = emailAddress;
-        this.firebaseAuthIdToken = firebaseAuthIdToken;
-    }
-
-    public User(String id, String name, String emailAddress, String firebaseAuthIdToken, List<DocumentReference> events, List<Event> eventList) {
-        this.id = id;
+    public User(String name, String emailAddress, String firebaseAuthIdToken) {
         this.name = name;
         this.emailAddress = emailAddress;
         this.firebaseAuthIdToken = firebaseAuthIdToken;
     }
 
     public static User fromDocument(DocumentSnapshot documentSnapshot) {
-        User user = documentSnapshot.toObject(User.class);
-        user.id = documentSnapshot.getId();
-        return user;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+        return documentSnapshot.toObject(User.class);
     }
 
     public String getName() {
@@ -88,9 +65,8 @@ public class User {
     @Override
     public String toString() {
         return "User{" +
-                "\n id='" + id + '\'' +
+                "\n emailAddress='" + emailAddress + '\'' +
                 ",\n name='" + name + '\'' +
-                ",\n emailAddress='" + emailAddress + '\'' +
                 ",\n firebaseAuthIdToken='" + firebaseAuthIdToken + '\'' +
                 "\n}";
     }
