@@ -76,6 +76,24 @@ public class Event {
         this.owner = owner;
     }
 
+    public Event(String name, @Nullable String description, long time, long endTime, @Nullable String location, int servings, boolean appetizer, boolean starter, boolean main, boolean dessert, @Nullable String type, float budget, @Nullable String budgetCurrency, Map<String, Long> users, DocumentReference owner) {
+        this.name = name;
+        this.description = description;
+        this.time = time;
+        this.endTime = endTime;
+        this.location = location;
+        this.servings = servings;
+        this.appetizer = appetizer;
+        this.starter = starter;
+        this.main = main;
+        this.dessert = dessert;
+        this.type = type;
+        this.budget = budget;
+        this.budgetCurrency = budgetCurrency;
+        this.users = users;
+        this.owner = owner;
+    }
+
     public static Event fromDocument(DocumentSnapshot documentSnapshot) {
         Event event = documentSnapshot.toObject(Event.class);
         event.id = documentSnapshot.getId();

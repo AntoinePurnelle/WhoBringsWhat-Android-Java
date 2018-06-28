@@ -3,6 +3,7 @@ package net.ouftech.whobringswhat.model;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreSettings;
@@ -12,7 +13,10 @@ import net.ouftech.whobringswhat.commons.Logger;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class FirestoreManager {
 
@@ -33,12 +37,12 @@ public class FirestoreManager {
         db.setFirestoreSettings(settings);
     }
 
-
     public static void test() {
-        testFetch();
+        //testFetch();
+        //testFetchEventById();
         //testAddUser();
+        testAddEvent();
     }
-
 
     public static void testAddUser() {
         User user = new User("User2", "apu+user2@ouftech.net", "2222");
@@ -51,6 +55,50 @@ public class FirestoreManager {
             @Override
             public void onFailure(Exception e) {
                 Logger.e(getLogTag(), "Error while creating user", e);
+            }
+        });
+    }
+
+    public static void testAddEvent() {
+        long date = new Date().getTime();
+        Map<String, Long> users = new HashMap<>();
+        users.put("2222", date);
+        Event event = new Event(
+                "Event 3",
+                "Description Event 3",
+                date, date + 1000,
+                "Event 3 location",
+                100,
+                true, true, true, true,
+                "Barbecue",
+                15, "$",
+                users,
+                db.collection(USERS_COLLECTIONS_NAME).document("apu+user2@ouftech.net")
+        );
+
+        saveEvent(event, new AddListener() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Logger.d(getLogTag(), "Event created with success!");
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Logger.e(getLogTag(), "Error while creating event", e);
+            }
+        });
+    }
+
+    public static void testFetchEventById() {
+        fetchEventById("IMQbaBnwLbCLt9tEKwYG", new EventQueryListener() {
+            @Override
+            public void onSuccess(@Nullable Event event) {
+                Logger.d(getLogTag(), event.toString());
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Logger.e(getLogTag(), "Error while fetching event", e);
             }
         });
     }
@@ -109,7 +157,27 @@ public class FirestoreManager {
                         listener.onSuccess(user);
 
                     } else {
-                        Logger.w(getLogTag(), "Error getting user documents: ", userTask.getException());
+                        Logger.w(getLogTag(), "Error getting user document: ", userTask.getException());
+                        listener.onSuccess(null);
+                    }
+
+                })
+                .addOnFailureListener(listener::onFailure);
+    }
+
+    public static void fetchEventById(String id, @NonNull EventQueryListener listener) {
+        db.collection(EVENTS_COLLECTIONS_NAME)
+                .document(id)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot documentSnapshot = task.getResult();
+
+                        Event event = Event.fromDocument(documentSnapshot);
+                        listener.onSuccess(event);
+
+                    } else {
+                        Logger.w(getLogTag(), "Error getting event document: ", task.getException());
                         listener.onSuccess(null);
                     }
 
@@ -175,12 +243,26 @@ public class FirestoreManager {
                 .addOnFailureListener(listener::onFailure);
     }
 
+    public static void saveEvent(@NonNull Event event, @NonNull AddListener listener) {
+        DocumentReference documentReference = db.collection(EVENTS_COLLECTIONS_NAME).document();
+        event.setId(documentReference.getId());
+
+        documentReference
+                .set(event)
+                .addOnSuccessListener(listener::onSuccess)
+                .addOnFailureListener(listener::onFailure);
+    }
+
     public interface QueryListener {
         void onFailure(Exception e);
     }
 
     public interface UserQueryListener extends QueryListener {
         void onSuccess(@Nullable User user);
+    }
+
+    public interface EventQueryListener extends QueryListener {
+        void onSuccess(@Nullable Event event);
     }
 
     public interface EventsQueryListener extends QueryListener {
