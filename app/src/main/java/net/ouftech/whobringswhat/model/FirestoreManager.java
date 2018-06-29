@@ -3,6 +3,7 @@ package net.ouftech.whobringswhat.model;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -25,6 +26,7 @@ public class FirestoreManager {
     public static final String CONTRIBUTIONS_COLLECTIONS_NAME = "contributions";
 
     private static FirebaseFirestore db;
+    private static User currentUser;
 
     public static void init() {
         db = FirebaseFirestore.getInstance();
@@ -38,11 +40,11 @@ public class FirestoreManager {
     }
 
     public static void test() {
-        //testFetch();
+        testFetch();
         //testFetchEventById();
         //testAddUser();
         //testAddEvent();
-        testAddContribution();
+        //testAddContribution();
     }
 
     public static void testAddUser() {
@@ -140,7 +142,7 @@ public class FirestoreManager {
     }
 
     public static void testFetch() {
-        fetchUserByEmail("apu+user1@ouftech.net", new UserQueryListener() {
+        fetchUserById("yfXkVS4B7mezZVMqqkruWHAf9Js2", new UserQueryListener() {
             @Override
             public void onSuccess(@Nullable User user) {
                 if (user != null) {
@@ -181,22 +183,21 @@ public class FirestoreManager {
         });
     }
 
-    public static void fetchUserByEmail(String emailAddress, @NonNull UserQueryListener listener) {
+    public static void fetchUserById(String id, @NonNull UserQueryListener listener) {
         db.collection(USERS_COLLECTIONS_NAME)
-                .document(emailAddress)
+                .document(id)
                 .get()
                 .addOnCompleteListener(userTask -> {
                     if (userTask.isSuccessful()) {
                         DocumentSnapshot userDocumentSnapshot = userTask.getResult();
-
                         User user = User.fromDocument(userDocumentSnapshot);
+
                         listener.onSuccess(user);
 
                     } else {
                         Logger.w(getLogTag(), "Error getting user document: ", userTask.getException());
-                        listener.onSuccess(null);
+                        listener.onFailure(userTask.getException());
                     }
-
                 })
                 .addOnFailureListener(listener::onFailure);
     }
@@ -214,36 +215,33 @@ public class FirestoreManager {
 
                     } else {
                         Logger.w(getLogTag(), "Error getting event document: ", task.getException());
-                        listener.onSuccess(null);
+                        listener.onFailure(task.getException());
                     }
-
                 })
                 .addOnFailureListener(listener::onFailure);
     }
 
     public static void fetchEventsForUser(@NonNull User user, @NonNull EventsQueryListener listener) {
         db.collection(EVENTS_COLLECTIONS_NAME)
-                .whereGreaterThan(Event.USERS_FIELD + "." + user.getFirebaseAuthIdToken(), 0)
-                .orderBy(Event.USERS_FIELD + "." + user.getFirebaseAuthIdToken())
+                .whereGreaterThan(Event.USERS_FIELD + "." + user.getFirebaseId(), 0)
+                .orderBy(Event.USERS_FIELD + "." + user.getFirebaseId())
                 .get()
                 .addOnCompleteListener(eventsTask -> {
-                    List<Event> eventList = null;
                     if (eventsTask.isSuccessful()) {
-
                         QuerySnapshot eventsQuerySnapshot = eventsTask.getResult();
-
-                        eventList = new ArrayList<>();
+                        List<Event> eventList = new ArrayList<>();
 
                         for (DocumentSnapshot eventsDocumentSnapshot : eventsQuerySnapshot) {
                             Event event = Event.fromDocument(eventsDocumentSnapshot);
                             eventList.add(event);
                         }
 
+                        listener.onSuccess(eventList);
                     } else {
                         Logger.w(getLogTag(), "Error getting events documents: ", eventsTask.getException());
+                        listener.onFailure(eventsTask.getException());
                     }
 
-                    listener.onSuccess(eventList);
                 })
                 .addOnFailureListener(listener::onFailure);
     }
@@ -251,29 +249,60 @@ public class FirestoreManager {
     public static void fetchContributionsForEvent(@NonNull Event event, @NonNull ContributionsQueryListener listener) {
         db.collection(EVENTS_COLLECTIONS_NAME + "/" + event.getId() + "/" + CONTRIBUTIONS_COLLECTIONS_NAME).get()
                 .addOnCompleteListener(contributionsTask -> {
-                    List<Contribution> contributionsList = null;
-
                     if (contributionsTask.isSuccessful()) {
                         QuerySnapshot contributionsQuerySnapshot = contributionsTask.getResult();
 
-                        contributionsList = new ArrayList<>();
+                        List<Contribution> contributionsList = new ArrayList<>();
 
                         for (DocumentSnapshot contributionsDocumentSnapshot : contributionsQuerySnapshot) {
                             Contribution contribution = Contribution.fromDocument(contributionsDocumentSnapshot);
                             contributionsList.add(contribution);
                         }
-
+                        listener.onSuccess(contributionsList);
                     } else {
                         Logger.w(getLogTag(), "Error getting events documents: ", contributionsTask.getException());
+                        listener.onFailure(contributionsTask.getException());
                     }
 
-                    listener.onSuccess(contributionsList);
                 })
                 .addOnFailureListener(listener::onFailure);
     }
 
+    public static void initWithFirebaseUser(@NonNull FirebaseUser firebaseUser) {
+        db.collection(USERS_COLLECTIONS_NAME)
+                .document(firebaseUser.getUid())
+                .get()
+                .addOnCompleteListener(userTask -> {
+                    if (userTask.isSuccessful()) {
+                        DocumentSnapshot userDocumentSnapshot = userTask.getResult();
+                        if (userDocumentSnapshot.exists()) {
+                            currentUser = User.fromDocument(userDocumentSnapshot);
+                            Logger.d(getLogTag(), String.format("User fetched: %s", currentUser));
+                        } else {
+                            User user = User.fromFirebaseUser(firebaseUser);
+                            saveUser(user, new AddListener() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    currentUser = user;
+                                    Logger.d(getLogTag(), String.format("User created: %s", user));
+                                }
+
+                                @Override
+                                public void onFailure(Exception e) {
+                                    Logger.w(getLogTag(), "Error querying or creating the User on Firestore", e);
+                                }
+                            });
+                        }
+
+                    } else {
+                        Logger.w(getLogTag(), "Error getting user document: ", userTask.getException());
+                    }
+                })
+                .addOnFailureListener(e -> Logger.w(getLogTag(), "Error getting user document: ", e));
+    }
+
     public static void saveUser(@NonNull User user, @NonNull AddListener listener) {
-        db.collection(USERS_COLLECTIONS_NAME).document(user.getEmailAddress())
+        db.collection(USERS_COLLECTIONS_NAME).document(user.getFirebaseId())
                 .set(user)
                 .addOnSuccessListener(listener::onSuccess)
                 .addOnFailureListener(listener::onFailure);
@@ -306,19 +335,19 @@ public class FirestoreManager {
     }
 
     public interface UserQueryListener extends QueryListener {
-        void onSuccess(@Nullable User user);
+        void onSuccess(@NonNull User user);
     }
 
     public interface EventQueryListener extends QueryListener {
-        void onSuccess(@Nullable Event event);
+        void onSuccess(@NonNull Event event);
     }
 
     public interface EventsQueryListener extends QueryListener {
-        void onSuccess(@Nullable List<Event> events);
+        void onSuccess(@NonNull List<Event> events);
     }
 
     public interface ContributionsQueryListener extends QueryListener {
-        void onSuccess(@Nullable List<Contribution> contributions);
+        void onSuccess(@NonNull List<Contribution> contributions);
     }
 
     public interface AddListener extends QueryListener {

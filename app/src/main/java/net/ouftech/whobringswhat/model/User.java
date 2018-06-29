@@ -16,6 +16,9 @@
 
 package net.ouftech.whobringswhat.model;
 
+import android.support.annotation.NonNull;
+
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 
 public class User {
@@ -24,18 +27,22 @@ public class User {
 
     private String emailAddress;
     private String name;
-    private String firebaseAuthIdToken;
+    private String firebaseId;
 
     public User(){}
 
-    public User(String name, String emailAddress, String firebaseAuthIdToken) {
+    public User(String name, String emailAddress, String firebaseId) {
         this.name = name;
         this.emailAddress = emailAddress;
-        this.firebaseAuthIdToken = firebaseAuthIdToken;
+        this.firebaseId = firebaseId;
     }
 
-    public static User fromDocument(DocumentSnapshot documentSnapshot) {
+    public static User fromDocument(@NonNull DocumentSnapshot documentSnapshot) {
         return documentSnapshot.toObject(User.class);
+    }
+
+    public static User fromFirebaseUser(@NonNull FirebaseUser firebaseUser) {
+       return new User(firebaseUser.getDisplayName(), firebaseUser.getEmail(), firebaseUser.getUid());
     }
 
     public String getName() {
@@ -54,12 +61,12 @@ public class User {
         this.emailAddress = emailAddress;
     }
 
-    public String getFirebaseAuthIdToken() {
-        return firebaseAuthIdToken;
+    public String getFirebaseId() {
+        return firebaseId;
     }
 
-    public void setFirebaseAuthIdToken(String firebaseAuthIdToken) {
-        this.firebaseAuthIdToken = firebaseAuthIdToken;
+    public void setFirebaseId(String firebaseId) {
+        this.firebaseId = firebaseId;
     }
 
     @Override
@@ -67,7 +74,7 @@ public class User {
         return "User{" +
                 "\n emailAddress='" + emailAddress + '\'' +
                 ",\n name='" + name + '\'' +
-                ",\n firebaseAuthIdToken='" + firebaseAuthIdToken + '\'' +
+                ",\n firebaseId='" + firebaseId + '\'' +
                 "\n}";
     }
 }
