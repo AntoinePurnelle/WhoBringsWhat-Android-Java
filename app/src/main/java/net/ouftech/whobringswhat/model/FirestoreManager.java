@@ -39,6 +39,263 @@ public class FirestoreManager {
         db.setFirestoreSettings(settings);
     }
 
+    
+    // region Users
+
+    /**
+     * Fetches a {@link User} item from Firestore using its Firebase Auth id<br/>
+     * @param id Firebase Auth id of the user ({@link FirebaseUser#getUid()})
+     * @param listener Query listener used to return the fetched user
+     */
+    public static void fetchUserById(@NonNull String id, @NonNull UserQueryListener listener) {
+        db.collection(USERS_COLLECTIONS_NAME)
+                .document(id)
+                .get()
+                .addOnCompleteListener(userTask -> {
+                    if (userTask.isSuccessful()) {
+                        DocumentSnapshot userDocumentSnapshot = userTask.getResult();
+                        User user = User.fromDocument(userDocumentSnapshot);
+
+                        listener.onSuccess(user);
+
+                    } else {
+                        Logger.w(getLogTag(), "Error getting user document: ", userTask.getException());
+                        listener.onFailure(userTask.getException());
+                    }
+                })
+                .addOnFailureListener(listener::onFailure);
+    }
+
+    /**
+     * Creates or fetches a {@link User} item using a {@link FirebaseUser} object.<br/>
+     * If a {@link User} with the same id exists ({@link FirebaseUser#getUid()}), it will be fetched.<br/>
+     * If the user is new, it will be created.<br/>
+     *
+     * @param firebaseUser {@link FirebaseUser} object retrieved from authentication used to create or fetch the {@link User} document
+     */
+    public static void initWithFirebaseUser(@NonNull FirebaseUser firebaseUser) {
+        // Try to fetch the user
+        db.collection(USERS_COLLECTIONS_NAME)
+                .document(firebaseUser.getUid())
+                .get()
+                .addOnCompleteListener(userTask -> {
+                    if (userTask.isSuccessful()) {
+                        DocumentSnapshot userDocumentSnapshot = userTask.getResult();
+
+                        if (userDocumentSnapshot.exists()) {
+                            // If user from Firebase exists, save it
+                            currentUser = User.fromDocument(userDocumentSnapshot);
+                            Logger.d(getLogTag(), String.format("User fetched: %s", currentUser));
+                        } else {
+                            // If user doesn't exist, create it
+                            User user = User.fromFirebaseUser(firebaseUser);
+                            saveUser(user, new AddListener() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    currentUser = user;
+                                    Logger.d(getLogTag(), String.format("User created: %s", user));
+                                }
+
+                                @Override
+                                public void onFailure(Exception e) {
+                                    Logger.w(getLogTag(), "Error creating the User on Firestore", e);
+                                }
+                            });
+                        }
+
+                    } else {
+                        Logger.w(getLogTag(), "Error getting user document: ", userTask.getException());
+                    }
+                })
+                .addOnFailureListener(e -> Logger.w(getLogTag(), "Error getting user document: ", e));
+    }
+
+    /**
+     * Saves {@link User} document to Firestore.<br/>
+     * CAUTION: This method will save every field of the {@link User} object to save them in Firestore, even the NULL ones!<br/>
+     * Calling this method will replace anything stored on Firestore for that document.
+     *
+     * @param user {@link User} to save as a Firestore document
+     * @param listener Query Listener for success and failure callbacks
+     */
+    public static void saveUser(@NonNull User user, @NonNull AddListener listener) {
+        db.collection(USERS_COLLECTIONS_NAME).document(user.getFirebaseId())
+                .set(user)
+                .addOnSuccessListener(listener::onSuccess)
+                .addOnFailureListener(listener::onFailure);
+    }
+
+    // endregion Users
+
+
+    // region Events
+
+    /**
+     * Fetches a {@link Event} item from Firestore using its id<br/>
+     * @param id id of the {@link Event} document to fetch
+     * @param listener Query Listener for success and failure callbacks
+     */
+    public static void fetchEventById(@NonNull String id, @NonNull EventQueryListener listener) {
+        db.collection(EVENTS_COLLECTIONS_NAME)
+                .document(id)
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot documentSnapshot = task.getResult();
+
+                        Event event = Event.fromDocument(documentSnapshot);
+                        listener.onSuccess(event);
+
+                    } else {
+                        Logger.w(getLogTag(), "Error getting event document: ", task.getException());
+                        listener.onFailure(task.getException());
+                    }
+                })
+                .addOnFailureListener(listener::onFailure);
+    }
+
+    /**
+     * Fetches the list of events for the given {@link User} object.<br/>
+     * Events are ordered by start date ({@link Event#time})
+     *
+     * @param user {@link User} object from which to get the events
+     * @param listener Query Listener for success and failure callbacks
+     */
+    public static void fetchEventsForUser(@NonNull User user, @NonNull EventsQueryListener listener) {
+        /*
+        The link between a user and an event is in the event.
+        The event has a map for which the keys are the user ids and the values are the event start date.
+        See https://firebase.google.com/docs/firestore/solutions/arrays
+         */
+        db.collection(EVENTS_COLLECTIONS_NAME)
+                .whereGreaterThan(Event.USERS_FIELD + "." + user.getFirebaseId(), 0)
+                .orderBy(Event.USERS_FIELD + "." + user.getFirebaseId())
+                .get()
+                .addOnCompleteListener(eventsTask -> {
+                    if (eventsTask.isSuccessful()) {
+                        QuerySnapshot eventsQuerySnapshot = eventsTask.getResult();
+                        List<Event> eventList = new ArrayList<>();
+
+                        for (DocumentSnapshot eventsDocumentSnapshot : eventsQuerySnapshot) {
+                            Event event = Event.fromDocument(eventsDocumentSnapshot);
+                            eventList.add(event);
+                        }
+
+                        listener.onSuccess(eventList);
+                    } else {
+                        Logger.w(getLogTag(), "Error getting events documents: ", eventsTask.getException());
+                        listener.onFailure(eventsTask.getException());
+                    }
+
+                })
+                .addOnFailureListener(listener::onFailure);
+    }
+
+    /**
+     * Saves {@link Event} document to Firestore.<br/>
+     * CAUTION: This method will save every field of the {@link Event} object to save them in Firestore, even the NULL ones!<br/>
+     * Calling this method will replace anything stored on Firestore for that document.
+     *
+     * @param event {@link Event} to save as a Firestore document
+     * @param listener Query Listener for success and failure callbacks
+     */
+    public static void addEvent(@NonNull Event event, @NonNull AddListener listener) {
+        DocumentReference documentReference = db.collection(EVENTS_COLLECTIONS_NAME).document();
+        event.setId(documentReference.getId());
+
+        documentReference
+                .set(event)
+                .addOnSuccessListener(listener::onSuccess)
+                .addOnFailureListener(listener::onFailure);
+    }
+
+    // endregion Events
+
+
+    // region Contributions
+
+    /**
+     * Fetches the {@link Contribution} objects of the "contributions" collection in the given {@link Event}<br/>
+     * @param event
+     * @param listener
+     */
+    public static void fetchContributionsForEvent(@NonNull Event event, @NonNull ContributionsQueryListener listener) {
+        // fetch the /events/[EVENT_ID]/contributions collection
+        db.collection(EVENTS_COLLECTIONS_NAME + "/" + event.getId() + "/" + CONTRIBUTIONS_COLLECTIONS_NAME).get()
+                .addOnCompleteListener(contributionsTask -> {
+                    if (contributionsTask.isSuccessful()) {
+                        QuerySnapshot contributionsQuerySnapshot = contributionsTask.getResult();
+                        List<Contribution> contributionsList = new ArrayList<>();
+
+                        for (DocumentSnapshot contributionsDocumentSnapshot : contributionsQuerySnapshot) {
+                            Contribution contribution = Contribution.fromDocument(contributionsDocumentSnapshot);
+                            contributionsList.add(contribution);
+                        }
+                        listener.onSuccess(contributionsList);
+                    } else {
+                        Logger.w(getLogTag(), "Error getting events documents: ", contributionsTask.getException());
+                        listener.onFailure(contributionsTask.getException());
+                    }
+
+                })
+                .addOnFailureListener(listener::onFailure);
+    }
+
+    /**
+     * Saves {@link Contribution} document to Firestore.<br/>
+     * CAUTION: This method will save every field of the {@link Contribution} object to save them in Firestore, even the NULL ones!<br/>
+     * Calling this method will replace anything stored on Firestore for that document.
+     *
+     * @param event {@link Event} in which to save the Contribution
+     * @param contribution {@link Contribution} to save as a Firestore document
+     * @param listener Query Listener for success and failure callbacks
+     */
+    public static void addContribution(@NonNull Event event, @NonNull Contribution contribution, @NonNull AddListener listener) {
+        DocumentReference documentReference = db
+                .collection(EVENTS_COLLECTIONS_NAME).document(event.getId())
+                .collection(CONTRIBUTIONS_COLLECTIONS_NAME).document();
+        contribution.setId(documentReference.getId());
+
+        documentReference
+                .set(contribution)
+                .addOnSuccessListener(listener::onSuccess)
+                .addOnFailureListener(listener::onFailure);
+    }
+
+    // endregion Contributions
+
+
+    // region Listener Interfaces
+
+    public interface QueryListener {
+        void onFailure(Exception e);
+    }
+
+    public interface UserQueryListener extends QueryListener {
+        void onSuccess(@NonNull User user);
+    }
+
+    public interface EventQueryListener extends QueryListener {
+        void onSuccess(@NonNull Event event);
+    }
+
+    public interface EventsQueryListener extends QueryListener {
+        void onSuccess(@NonNull List<Event> events);
+    }
+
+    public interface ContributionsQueryListener extends QueryListener {
+        void onSuccess(@NonNull List<Contribution> contributions);
+    }
+
+    public interface AddListener extends QueryListener {
+        void onSuccess(Void aVoid);
+    }
+
+    // endregion Listener Interfaces
+
+
+    // region test methods
+
     public static void test() {
         testFetch();
         //testFetchEventById();
@@ -183,177 +440,9 @@ public class FirestoreManager {
         });
     }
 
-    public static void fetchUserById(String id, @NonNull UserQueryListener listener) {
-        db.collection(USERS_COLLECTIONS_NAME)
-                .document(id)
-                .get()
-                .addOnCompleteListener(userTask -> {
-                    if (userTask.isSuccessful()) {
-                        DocumentSnapshot userDocumentSnapshot = userTask.getResult();
-                        User user = User.fromDocument(userDocumentSnapshot);
-
-                        listener.onSuccess(user);
-
-                    } else {
-                        Logger.w(getLogTag(), "Error getting user document: ", userTask.getException());
-                        listener.onFailure(userTask.getException());
-                    }
-                })
-                .addOnFailureListener(listener::onFailure);
-    }
-
-    public static void fetchEventById(String id, @NonNull EventQueryListener listener) {
-        db.collection(EVENTS_COLLECTIONS_NAME)
-                .document(id)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot documentSnapshot = task.getResult();
-
-                        Event event = Event.fromDocument(documentSnapshot);
-                        listener.onSuccess(event);
-
-                    } else {
-                        Logger.w(getLogTag(), "Error getting event document: ", task.getException());
-                        listener.onFailure(task.getException());
-                    }
-                })
-                .addOnFailureListener(listener::onFailure);
-    }
-
-    public static void fetchEventsForUser(@NonNull User user, @NonNull EventsQueryListener listener) {
-        db.collection(EVENTS_COLLECTIONS_NAME)
-                .whereGreaterThan(Event.USERS_FIELD + "." + user.getFirebaseId(), 0)
-                .orderBy(Event.USERS_FIELD + "." + user.getFirebaseId())
-                .get()
-                .addOnCompleteListener(eventsTask -> {
-                    if (eventsTask.isSuccessful()) {
-                        QuerySnapshot eventsQuerySnapshot = eventsTask.getResult();
-                        List<Event> eventList = new ArrayList<>();
-
-                        for (DocumentSnapshot eventsDocumentSnapshot : eventsQuerySnapshot) {
-                            Event event = Event.fromDocument(eventsDocumentSnapshot);
-                            eventList.add(event);
-                        }
-
-                        listener.onSuccess(eventList);
-                    } else {
-                        Logger.w(getLogTag(), "Error getting events documents: ", eventsTask.getException());
-                        listener.onFailure(eventsTask.getException());
-                    }
-
-                })
-                .addOnFailureListener(listener::onFailure);
-    }
-
-    public static void fetchContributionsForEvent(@NonNull Event event, @NonNull ContributionsQueryListener listener) {
-        db.collection(EVENTS_COLLECTIONS_NAME + "/" + event.getId() + "/" + CONTRIBUTIONS_COLLECTIONS_NAME).get()
-                .addOnCompleteListener(contributionsTask -> {
-                    if (contributionsTask.isSuccessful()) {
-                        QuerySnapshot contributionsQuerySnapshot = contributionsTask.getResult();
-
-                        List<Contribution> contributionsList = new ArrayList<>();
-
-                        for (DocumentSnapshot contributionsDocumentSnapshot : contributionsQuerySnapshot) {
-                            Contribution contribution = Contribution.fromDocument(contributionsDocumentSnapshot);
-                            contributionsList.add(contribution);
-                        }
-                        listener.onSuccess(contributionsList);
-                    } else {
-                        Logger.w(getLogTag(), "Error getting events documents: ", contributionsTask.getException());
-                        listener.onFailure(contributionsTask.getException());
-                    }
-
-                })
-                .addOnFailureListener(listener::onFailure);
-    }
-
-    public static void initWithFirebaseUser(@NonNull FirebaseUser firebaseUser) {
-        db.collection(USERS_COLLECTIONS_NAME)
-                .document(firebaseUser.getUid())
-                .get()
-                .addOnCompleteListener(userTask -> {
-                    if (userTask.isSuccessful()) {
-                        DocumentSnapshot userDocumentSnapshot = userTask.getResult();
-                        if (userDocumentSnapshot.exists()) {
-                            currentUser = User.fromDocument(userDocumentSnapshot);
-                            Logger.d(getLogTag(), String.format("User fetched: %s", currentUser));
-                        } else {
-                            User user = User.fromFirebaseUser(firebaseUser);
-                            saveUser(user, new AddListener() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    currentUser = user;
-                                    Logger.d(getLogTag(), String.format("User created: %s", user));
-                                }
-
-                                @Override
-                                public void onFailure(Exception e) {
-                                    Logger.w(getLogTag(), "Error querying or creating the User on Firestore", e);
-                                }
-                            });
-                        }
-
-                    } else {
-                        Logger.w(getLogTag(), "Error getting user document: ", userTask.getException());
-                    }
-                })
-                .addOnFailureListener(e -> Logger.w(getLogTag(), "Error getting user document: ", e));
-    }
-
-    public static void saveUser(@NonNull User user, @NonNull AddListener listener) {
-        db.collection(USERS_COLLECTIONS_NAME).document(user.getFirebaseId())
-                .set(user)
-                .addOnSuccessListener(listener::onSuccess)
-                .addOnFailureListener(listener::onFailure);
-    }
-
-    public static void addEvent(@NonNull Event event, @NonNull AddListener listener) {
-        DocumentReference documentReference = db.collection(EVENTS_COLLECTIONS_NAME).document();
-        event.setId(documentReference.getId());
-
-        documentReference
-                .set(event)
-                .addOnSuccessListener(listener::onSuccess)
-                .addOnFailureListener(listener::onFailure);
-    }
-
-    public static void addContribution(@NonNull Event event, @NonNull Contribution contribution, @NonNull AddListener listener) {
-        DocumentReference documentReference = db
-                .collection(EVENTS_COLLECTIONS_NAME).document(event.getId())
-                .collection(CONTRIBUTIONS_COLLECTIONS_NAME).document();
-        contribution.setId(documentReference.getId());
-
-        documentReference
-                .set(contribution)
-                .addOnSuccessListener(listener::onSuccess)
-                .addOnFailureListener(listener::onFailure);
-    }
-
-    public interface QueryListener {
-        void onFailure(Exception e);
-    }
-
-    public interface UserQueryListener extends QueryListener {
-        void onSuccess(@NonNull User user);
-    }
-
-    public interface EventQueryListener extends QueryListener {
-        void onSuccess(@NonNull Event event);
-    }
-
-    public interface EventsQueryListener extends QueryListener {
-        void onSuccess(@NonNull List<Event> events);
-    }
-
-    public interface ContributionsQueryListener extends QueryListener {
-        void onSuccess(@NonNull List<Contribution> contributions);
-    }
-
-    public interface AddListener extends QueryListener {
-        void onSuccess(Void aVoid);
-    }
-
+    // endregion Test methods
+    
+    
     public static String getLogTag() {
         return "FirestoreManager";
     }
