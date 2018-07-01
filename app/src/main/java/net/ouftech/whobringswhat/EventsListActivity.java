@@ -20,10 +20,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
@@ -60,36 +62,27 @@ public class EventsListActivity extends BaseActivity {
         });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-
-
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            // TODO open login popup
-        } else {
-            FirestoreManager.initWithFirebaseUser(FirebaseAuth.getInstance().getCurrentUser());
-        }
-    }
-
     private void init() {
         Fabric.with(this);
         FirestoreManager.init();
     }
 
-    private void signOut() {
-        AuthUI.getInstance()
-                .signOut(this)
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful())
-                        Logger.d(getLogTag(), "Sign out successful");
-                    else
-                        Logger.w(getLogTag(), "Sign out failed", task.getException());
+    @Override
+    protected void onResume() {
+        super.onResume();
 
-                    updateLoginMenu();
-                });
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null)
+            // If user is logged in (can be anonymously)
+            onLoggedIn(firebaseUser);
+        else
+            // If no user is logged in
+            displayLoginDialog();
     }
 
+    /**
+     * Create the FirebaseUI Auth Activity
+     */
     private void launchSignIn() {
         List<AuthUI.IdpConfig> providers = Arrays.asList(
                 new AuthUI.IdpConfig.EmailBuilder().build(),
@@ -106,26 +99,107 @@ public class EventsListActivity extends BaseActivity {
                 RC_SIGN_IN);
     }
 
+    /**
+     * Signs the user out
+     */
+    private void signOut() {
+        AuthUI.getInstance()
+                .signOut(this)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful())
+                        Logger.d(getLogTag(), "Sign out successful");
+                    else
+                        Logger.w(getLogTag(), "Sign out failed", task.getException());
+
+                    updateLoginMenu();
+                });
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == RC_SIGN_IN) {
+        if (requestCode == RC_SIGN_IN) { // FirebaseUI Auth Result
             IdpResponse response = IdpResponse.fromResultIntent(data);
-
-            if (resultCode == RESULT_OK) {
-                // Successfully signed in
+            if (resultCode == RESULT_OK) { // User has logged in
                 FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-                updateLoginMenu();
-                FirestoreManager.initWithFirebaseUser(firebaseUser);
-                // ...
+                if (firebaseUser == null) {
+                    Logger.e(getLogTag(), new NullPointerException("Firebase user is null but result is OK"));
+                    displayLoginError();
+                } else {
+                    Logger.d(getLogTag(), String.format("Logged in user %s-%s", firebaseUser.getUid(), firebaseUser.getEmail()));
+                    onLoggedIn(firebaseUser);
+                }
             } else {
-                // Sign in failed. If response is null the user canceled the
-                // sign-in flow using the back button. Otherwise check
-                // response.getError().getErrorCode() and handle the error.
-                // ...
+                if (response != null && response.getError() != null) {
+                    Logger.e(getLogTag(), "Error during login with Firebase", response.getError());
+                    displayLoginError();
+                } else {
+                    Logger.d(getLogTag(), "User cancelled login");
+                }
             }
         }
+    }
+
+    /**
+     * Displays the dialog offering to log in or continue anonymously
+     */
+    private void displayLoginDialog() {
+        if (isRunning())
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.login_dialog_title)
+                    .setMessage(R.string.login_dialog_message)
+                    .setPositiveButton(R.string.login, (dialog, which) -> {
+                        dialog.dismiss();
+                        launchSignIn();
+                    })
+                    .setNegativeButton(R.string.not_now, (dialog, which) -> {
+                        dialog.dismiss();
+                        anonymousLogin();
+                    })
+                    .show();
+    }
+
+    /**
+     * Displays an error dialog when login failed
+     */
+    private void displayLoginError() {
+        if (isRunning())
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.login_error_dialog_title)
+                    .setMessage(R.string.login_error_dialog_message)
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> dialog.dismiss())
+                    .show();
+    }
+
+    /**
+     * Log in anonymously to Firebase
+     */
+    private void anonymousLogin() {
+        FirebaseAuth.getInstance().signInAnonymously()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+                        if (firebaseUser == null) {
+                            Logger.e(getLogTag(), new NullPointerException("Firebase user is null but task is successful"));
+                        } else {
+                            Logger.d(getLogTag(), String.format("Logged in anonymously with user %s", firebaseUser.getUid()));
+                            onLoggedIn(firebaseUser);
+                        }
+                    } else {
+                        Logger.e(getLogTag(), "Error during anonymous login with Firebase", task.getException());
+                    }
+                });
+    }
+
+    /**
+     * Update the login menu, sets the user to Crashlytics and fetches or create the Firestore {@link net.ouftech.whobringswhat.model.User} object
+     * @param firebaseUser Logged in user
+     */
+    private void onLoggedIn(@NonNull FirebaseUser firebaseUser) {
+        updateLoginMenu();
+        FirestoreManager.initWithFirebaseUser(firebaseUser);
+        Crashlytics.setUserIdentifier(firebaseUser.getUid());
     }
 
     @Override
@@ -142,10 +216,11 @@ public class EventsListActivity extends BaseActivity {
 
         Menu menu = toolbar.getMenu();
 
-        if (menu == null)
+        if (menu == null || menu.findItem(R.id.action_log_in) == null)
             return;
 
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser == null || firebaseUser.isAnonymous()) {
             menu.findItem(R.id.action_log_out).setVisible(false);
             menu.findItem(R.id.action_log_in).setVisible(true);
         } else {
@@ -156,12 +231,8 @@ public class EventsListActivity extends BaseActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_log_in) {
             launchSignIn();
             return true;
