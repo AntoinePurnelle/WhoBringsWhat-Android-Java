@@ -14,13 +14,15 @@
  * limitations under the License.
  */
 
-package net.ouftech.whobringswhat;
+package net.ouftech.whobringswhat.eventslist;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,24 +33,36 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import net.ouftech.whobringswhat.R;
 import net.ouftech.whobringswhat.commons.BaseActivity;
 import net.ouftech.whobringswhat.commons.Logger;
+import net.ouftech.whobringswhat.model.Event;
 import net.ouftech.whobringswhat.model.FirestoreManager;
+import net.ouftech.whobringswhat.model.User;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import io.fabric.sdk.android.Fabric;
+import io.github.luizgrp.sectionedrecyclerviewadapter.SectionedRecyclerViewAdapter;
 
 public class EventsListActivity extends BaseActivity {
 
     private static final int RC_SIGN_IN = 9108;
 
-    @BindView(R.id.toolbar)
+    @BindView(R.id.events_list_toolbar)
     protected Toolbar toolbar;
     @BindView(R.id.fab)
     protected FloatingActionButton fab;
+    @BindView(R.id.events_list_rv)
+    protected RecyclerView eventsListRv;
+
+    private SectionedRecyclerViewAdapter sectionedAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +74,8 @@ public class EventsListActivity extends BaseActivity {
         fab.setOnClickListener(view -> {
             FirestoreManager.test();
         });
+
+
     }
 
     private void init() {
@@ -78,6 +94,55 @@ public class EventsListActivity extends BaseActivity {
         else
             // If no user is logged in
             displayLoginDialog();
+
+        sectionedAdapter = new SectionedRecyclerViewAdapter();
+        List<Event> eventsFuture = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            long date = new Date().getTime();
+            Map<String, Long> users = new HashMap<>();
+            users.put("2222", date);
+            Event event = new Event(
+                    "Future Event "+i,
+                    "Description Event 3",
+                    date, date + 1000,
+                    "Event 3 location",
+                    100,
+                    true, true, true, true,
+                    "Barbecue",
+                    15, "$",
+                    users,
+                    null
+            );
+            eventsFuture.add(event);
+        }
+
+        List<Event> eventsPast = new ArrayList<>();
+        for (int i = 0; i < 3; i++) {
+            long date = new Date().getTime();
+            Map<String, Long> users = new HashMap<>();
+            users.put("2222", date);
+            Event event = new Event(
+                    "Past Event "+i,
+                    "Description Event 3",
+                    date, date + 1000,
+                    "Event 3 location",
+                    100,
+                    true, true, true, true,
+                    "Barbecue",
+                    15, "$",
+                    users,
+                    null
+            );
+            eventsPast.add(event);
+        }
+
+
+        sectionedAdapter.addSection(new EventsSection(eventsFuture, "Upcoming"));
+        sectionedAdapter.addSection(new EventsSection(eventsPast, "Past"));
+
+
+        eventsListRv.setLayoutManager(new LinearLayoutManager(this));
+        eventsListRv.setAdapter(sectionedAdapter);
     }
 
     /**
@@ -193,7 +258,8 @@ public class EventsListActivity extends BaseActivity {
     }
 
     /**
-     * Update the login menu, sets the user to Crashlytics and fetches or create the Firestore {@link net.ouftech.whobringswhat.model.User} object
+     * Update the login menu, sets the user to Crashlytics and fetches or create the Firestore {@link User} object
+     *
      * @param firebaseUser Logged in user
      */
     private void onLoggedIn(@NonNull FirebaseUser firebaseUser) {

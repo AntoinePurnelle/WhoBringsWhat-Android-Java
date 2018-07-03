@@ -16,13 +16,15 @@
   ~ limitations under the License.
   -->
 
-<resources>
-    <string name="app_name">Who Brings What</string>
-    <string name="login">Log in</string>
-    <string name="logout">Log out</string>
-    <string name="not_now">Not now</string>
-    <string name="login_error_dialog_message">An error occurred while trying to log you in. Please try again</string>
-    <string name="login_error_dialog_title">Login error</string>
-    <string name="login_dialog_title">Log in to Who Brings What</string>
-    <string name="login_dialog_message">By logging in, you ensure to save the list of events you participate to. You will be able to find them whenever you log in to Who Brings What</string>
-</resources>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/event_item_header_tv"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="@dimen/small"
+    android:paddingEnd="@dimen/large"
+    android:paddingStart="@dimen/large"
+    android:paddingTop="@dimen/large"
+    android:textColor="@color/colorPrimary"
+    android:textSize="@dimen/text_size_title"
+    tools:text="Upcoming" />
