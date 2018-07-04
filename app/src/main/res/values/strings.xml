@@ -25,4 +25,6 @@
     <string name="login_error_dialog_title">Login error</string>
     <string name="login_dialog_title">Log in to Who Brings What</string>
     <string name="login_dialog_message">By logging in, you ensure to save the list of events you participate to. You will be able to find them whenever you log in to Who Brings What</string>
+    <string name="events_list_empty_message">No event to display. Press the + button to create a new one</string>
+    <string name="events_list_empty_message_not_logged_in">No event to display. Log in or press the + button to create a new one</string>
 </resources>

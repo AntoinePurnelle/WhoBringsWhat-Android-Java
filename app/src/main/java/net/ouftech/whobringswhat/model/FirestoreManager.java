@@ -39,12 +39,13 @@ public class FirestoreManager {
         db.setFirestoreSettings(settings);
     }
 
-    
+
     // region Users
 
     /**
      * Fetches a {@link User} item from Firestore using its Firebase Auth id<br/>
-     * @param id Firebase Auth id of the user ({@link FirebaseUser#getUid()})
+     *
+     * @param id       Firebase Auth id of the user ({@link FirebaseUser#getUid()})
      * @param listener Query listener used to return the fetched user
      */
     public static void fetchUserById(@NonNull String id, @NonNull UserQueryListener listener) {
@@ -73,7 +74,9 @@ public class FirestoreManager {
      *
      * @param firebaseUser {@link FirebaseUser} object retrieved from authentication used to create or fetch the {@link User} document
      */
-    public static void initWithFirebaseUser(@NonNull FirebaseUser firebaseUser) {
+    public static void initWithFirebaseUser(@NonNull FirebaseUser firebaseUser, UserQueryListener userQueryListener) {
+        Logger.d(getLogTag(), String.format("Initializing with FirebaseUser %s", firebaseUser.getUid()));
+
         // Try to fetch the user
         db.collection(USERS_COLLECTIONS_NAME)
                 .document(firebaseUser.getUid())
@@ -86,6 +89,7 @@ public class FirestoreManager {
                             // If user from Firebase exists, save it
                             currentUser = User.fromDocument(userDocumentSnapshot);
                             Logger.d(getLogTag(), String.format("User fetched: %s", currentUser));
+                            userQueryListener.onSuccess(currentUser);
                         } else {
                             // If user doesn't exist, create it
                             User user = User.fromFirebaseUser(firebaseUser);
@@ -94,20 +98,26 @@ public class FirestoreManager {
                                 public void onSuccess(Void aVoid) {
                                     currentUser = user;
                                     Logger.d(getLogTag(), String.format("User created: %s", user));
+                                    userQueryListener.onSuccess(currentUser);
                                 }
 
                                 @Override
                                 public void onFailure(Exception e) {
-                                    Logger.w(getLogTag(), "Error creating the User on Firestore", e);
+                                    Logger.w(getLogTag(), "Error creating the User on Firestore", e, false);
+                                    userQueryListener.onFailure(e);
                                 }
                             });
                         }
 
                     } else {
-                        Logger.w(getLogTag(), "Error getting user document: ", userTask.getException());
+                        Logger.w(getLogTag(), "Error getting user document: ", userTask.getException(), false);
+                        userQueryListener.onFailure(userTask.getException());
                     }
                 })
-                .addOnFailureListener(e -> Logger.w(getLogTag(), "Error getting user document: ", e));
+                .addOnFailureListener(e -> {
+                    Logger.w(getLogTag(), "Error getting user document: ", e, false);
+                    userQueryListener.onFailure(e);
+                });
     }
 
     /**
@@ -115,7 +125,7 @@ public class FirestoreManager {
      * CAUTION: This method will save every field of the {@link User} object to save them in Firestore, even the NULL ones!<br/>
      * Calling this method will replace anything stored on Firestore for that document.
      *
-     * @param user {@link User} to save as a Firestore document
+     * @param user     {@link User} to save as a Firestore document
      * @param listener Query Listener for success and failure callbacks
      */
     public static void saveUser(@NonNull User user, @NonNull AddListener listener) {
@@ -125,6 +135,11 @@ public class FirestoreManager {
                 .addOnFailureListener(listener::onFailure);
     }
 
+    public static void logout() {
+        Logger.d(getLogTag(), "Setting currentUser to null");
+        currentUser = null;
+    }
+
     // endregion Users
 
 
@@ -132,7 +147,8 @@ public class FirestoreManager {
 
     /**
      * Fetches a {@link Event} item from Firestore using its id<br/>
-     * @param id id of the {@link Event} document to fetch
+     *
+     * @param id       id of the {@link Event} document to fetch
      * @param listener Query Listener for success and failure callbacks
      */
     public static void fetchEventById(@NonNull String id, @NonNull EventQueryListener listener) {
@@ -158,18 +174,18 @@ public class FirestoreManager {
      * Fetches the list of events for the given {@link User} object.<br/>
      * Events are ordered by start date ({@link Event#time})
      *
-     * @param user {@link User} object from which to get the events
+     * @param userId     id {@link User} object from which to get the events
      * @param listener Query Listener for success and failure callbacks
      */
-    public static void fetchEventsForUser(@NonNull User user, @NonNull EventsQueryListener listener) {
+    public static void fetchEventsForUser(@NonNull String userId, @NonNull EventsQueryListener listener) {
         /*
         The link between a user and an event is in the event.
         The event has a map for which the keys are the user ids and the values are the event start date.
         See https://firebase.google.com/docs/firestore/solutions/arrays
          */
         db.collection(EVENTS_COLLECTIONS_NAME)
-                .whereGreaterThan(Event.USERS_FIELD + "." + user.getFirebaseId(), 0)
-                .orderBy(Event.USERS_FIELD + "." + user.getFirebaseId())
+                .whereGreaterThan(Event.USERS_FIELD + "." + userId, 0)
+                .orderBy(Event.USERS_FIELD + "." + userId)
                 .get()
                 .addOnCompleteListener(eventsTask -> {
                     if (eventsTask.isSuccessful()) {
@@ -192,11 +208,24 @@ public class FirestoreManager {
     }
 
     /**
+     * Fetches the list of events for the currently logged in user {@link User} object.<br/>
+     * Events are ordered by start date ({@link Event#time})
+     *
+     * @param listener Query Listener for success and failure callbacks
+     */
+    public static void fetchEventsForCurrentUser(@NonNull EventsQueryListener listener) {
+        if (currentUser != null)
+            fetchEventsForUser(currentUser.getFirebaseId(), listener);
+        else
+            listener.onFailure(new IllegalStateException("No logged in user"));
+    }
+
+    /**
      * Saves {@link Event} document to Firestore.<br/>
      * CAUTION: This method will save every field of the {@link Event} object to save them in Firestore, even the NULL ones!<br/>
      * Calling this method will replace anything stored on Firestore for that document.
      *
-     * @param event {@link Event} to save as a Firestore document
+     * @param event    {@link Event} to save as a Firestore document
      * @param listener Query Listener for success and failure callbacks
      */
     public static void addEvent(@NonNull Event event, @NonNull AddListener listener) {
@@ -216,6 +245,7 @@ public class FirestoreManager {
 
     /**
      * Fetches the {@link Contribution} objects of the "contributions" collection in the given {@link Event}<br/>
+     *
      * @param event
      * @param listener
      */
@@ -246,9 +276,9 @@ public class FirestoreManager {
      * CAUTION: This method will save every field of the {@link Contribution} object to save them in Firestore, even the NULL ones!<br/>
      * Calling this method will replace anything stored on Firestore for that document.
      *
-     * @param event {@link Event} in which to save the Contribution
+     * @param event        {@link Event} in which to save the Contribution
      * @param contribution {@link Contribution} to save as a Firestore document
-     * @param listener Query Listener for success and failure callbacks
+     * @param listener     Query Listener for success and failure callbacks
      */
     public static void addContribution(@NonNull Event event, @NonNull Contribution contribution, @NonNull AddListener listener) {
         DocumentReference documentReference = db
@@ -405,7 +435,7 @@ public class FirestoreManager {
                 if (user != null) {
                     Logger.d(getLogTag(), user.toString());
 
-                    fetchEventsForUser(user, new EventsQueryListener() {
+                    fetchEventsForUser(user.getFirebaseId(), new EventsQueryListener() {
                         @Override
                         public void onSuccess(@Nullable List<Event> events) {
                             if (events != null) {
@@ -441,8 +471,8 @@ public class FirestoreManager {
     }
 
     // endregion Test methods
-    
-    
+
+
     public static String getLogTag() {
         return "FirestoreManager";
     }

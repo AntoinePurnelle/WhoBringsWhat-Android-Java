@@ -26,6 +26,9 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
 import com.firebase.ui.auth.AuthUI;
@@ -43,9 +46,7 @@ import net.ouftech.whobringswhat.model.User;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import butterknife.BindView;
 import io.fabric.sdk.android.Fabric;
@@ -61,6 +62,10 @@ public class EventsListActivity extends BaseActivity {
     protected FloatingActionButton fab;
     @BindView(R.id.events_list_rv)
     protected RecyclerView eventsListRv;
+    @BindView(R.id.pb_loading_indicator)
+    protected ProgressBar progressBar;
+    @BindView(R.id.empty_message_textView)
+    protected TextView emptyMessageTextView;
 
     private SectionedRecyclerViewAdapter sectionedAdapter;
 
@@ -75,18 +80,6 @@ public class EventsListActivity extends BaseActivity {
             FirestoreManager.test();
         });
 
-
-    }
-
-    private void init() {
-        Fabric.with(this);
-        FirestoreManager.init();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if (firebaseUser != null)
             // If user is logged in (can be anonymously)
@@ -96,53 +89,13 @@ public class EventsListActivity extends BaseActivity {
             displayLoginDialog();
 
         sectionedAdapter = new SectionedRecyclerViewAdapter();
-        List<Event> eventsFuture = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            long date = new Date().getTime();
-            Map<String, Long> users = new HashMap<>();
-            users.put("2222", date);
-            Event event = new Event(
-                    "Future Event "+i,
-                    "Description Event 3",
-                    date, date + 1000,
-                    "Event 3 location",
-                    100,
-                    true, true, true, true,
-                    "Barbecue",
-                    15, "$",
-                    users,
-                    null
-            );
-            eventsFuture.add(event);
-        }
-
-        List<Event> eventsPast = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            long date = new Date().getTime();
-            Map<String, Long> users = new HashMap<>();
-            users.put("2222", date);
-            Event event = new Event(
-                    "Past Event "+i,
-                    "Description Event 3",
-                    date, date + 1000,
-                    "Event 3 location",
-                    100,
-                    true, true, true, true,
-                    "Barbecue",
-                    15, "$",
-                    users,
-                    null
-            );
-            eventsPast.add(event);
-        }
-
-
-        sectionedAdapter.addSection(new EventsSection(eventsFuture, "Upcoming"));
-        sectionedAdapter.addSection(new EventsSection(eventsPast, "Past"));
-
-
         eventsListRv.setLayoutManager(new LinearLayoutManager(this));
         eventsListRv.setAdapter(sectionedAdapter);
+    }
+
+    private void init() {
+        Fabric.with(this);
+        FirestoreManager.init();
     }
 
     /**
@@ -178,6 +131,10 @@ public class EventsListActivity extends BaseActivity {
 
                     updateLoginMenu();
                 });
+        sectionedAdapter.removeAllSections();
+        sectionedAdapter.notifyDataSetChanged();
+        emptyMessageTextView.setText(R.string.events_list_empty_message_not_logged_in);
+        emptyMessageTextView.setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -263,9 +220,67 @@ public class EventsListActivity extends BaseActivity {
      * @param firebaseUser Logged in user
      */
     private void onLoggedIn(@NonNull FirebaseUser firebaseUser) {
+        setProgressBarVisible(true);
         updateLoginMenu();
-        FirestoreManager.initWithFirebaseUser(firebaseUser);
         Crashlytics.setUserIdentifier(firebaseUser.getUid());
+
+        FirestoreManager.initWithFirebaseUser(firebaseUser, new FirestoreManager.UserQueryListener() {
+            @Override
+            public void onSuccess(@NonNull User user) {
+                Logger.d(getLogTag(), "Firestore login finished");
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Logger.e(getLogTag(), String.format("Error while fetching or creating user %s", firebaseUser.getUid()), e);
+            }
+        });
+
+
+        FirestoreManager.fetchEventsForUser(firebaseUser.getUid(), new FirestoreManager.EventsQueryListener() {
+            @Override
+            public void onSuccess(@NonNull List<Event> events) {
+                Logger.d(getLogTag(), String.format("Fetched %s events", events.size()));
+                long now = new Date().getTime();
+                List<Event> pastEvents = new ArrayList<>();
+                List<Event> upcomingEvents = new ArrayList<>();
+                for (Event event : events) {
+                    if (event.getTime() < now)
+                        pastEvents.add(event);
+                    else
+                        upcomingEvents.add(event);
+                }
+
+                displayEvents(pastEvents, upcomingEvents);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Logger.e(getLogTag(), String.format("Error while fetching events for user %s", firebaseUser.getUid()), e);
+            }
+        });
+    }
+
+    private void displayEvents(@NonNull List<Event> pastEvents, @NonNull List<Event> upcomingEvents) {
+        sectionedAdapter.removeAllSections();
+        if (!upcomingEvents.isEmpty())
+            sectionedAdapter.addSection(new EventsSection(upcomingEvents, "Upcoming"));
+        if (!pastEvents.isEmpty())
+            sectionedAdapter.addSection(new EventsSection(pastEvents, "Past"));
+
+        runOnUiThread(() -> {
+
+            if (upcomingEvents.isEmpty() && pastEvents.isEmpty() && emptyMessageTextView != null && isRunning()) {
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                emptyMessageTextView.setText((user == null || user.isAnonymous()) ? R.string.events_list_empty_message_not_logged_in : R.string.events_list_empty_message);
+                emptyMessageTextView.setVisibility(View.VISIBLE);
+            } else {
+                emptyMessageTextView.setVisibility(View.GONE);
+            }
+        });
+
+        sectionedAdapter.notifyDataSetChanged();
+        setProgressBarVisible(false);
     }
 
     @Override
@@ -308,6 +323,11 @@ public class EventsListActivity extends BaseActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setProgressBarVisible(final boolean visible) {
+        if (isRunning() && progressBar != null)
+            runOnUiThread(() -> progressBar.setVisibility(visible ? View.VISIBLE : View.GONE));
     }
 
     @NonNull
