@@ -17,6 +17,8 @@
 package net.ouftech.whobringswhat.model;
 
 
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 
 import com.google.firebase.firestore.CollectionReference;
@@ -25,7 +27,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 
 import java.util.Map;
 
-public class Event {
+public class Event implements Parcelable {
 
     public static final String USERS_FIELD = "users";
 
@@ -34,7 +36,6 @@ public class Event {
     @Nullable
     private String description;
     private long time;
-    @Nullable
     private long endTime;
     @Nullable
     private String location;
@@ -45,18 +46,17 @@ public class Event {
     private boolean dessert;
     @Nullable
     private String type;
-    private float budget;
     @Nullable
-    private String budgetCurrency;
+    private String budget;
     private CollectionReference contributions;
     private Map<String, Long> users;
     private DocumentReference owner; // User
 
     public Event() {
-
+        main = true;
     }
 
-    public Event(String id, String name, @Nullable String description, long time, long endTime, @Nullable String location, int servings, boolean appetizer, boolean starter, boolean main, boolean dessert, @Nullable String type, float budget, @Nullable String budgetCurrency, CollectionReference contributions, Map<String, Long> users, DocumentReference owner) {
+    public Event(String id, String name, @Nullable String description, long time, long endTime, @Nullable String location, int servings, boolean appetizer, boolean starter, boolean main, boolean dessert, @Nullable String type, @Nullable String budget, CollectionReference contributions, Map<String, Long> users, DocumentReference owner) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -70,13 +70,12 @@ public class Event {
         this.dessert = dessert;
         this.type = type;
         this.budget = budget;
-        this.budgetCurrency = budgetCurrency;
         this.contributions = contributions;
         this.users = users;
         this.owner = owner;
     }
 
-    public Event(String name, @Nullable String description, long time, long endTime, @Nullable String location, int servings, boolean appetizer, boolean starter, boolean main, boolean dessert, @Nullable String type, float budget, @Nullable String budgetCurrency, Map<String, Long> users, DocumentReference owner) {
+    public Event(String name, @Nullable String description, long time, long endTime, @Nullable String location, int servings, boolean appetizer, boolean starter, boolean main, boolean dessert, @Nullable String type, @Nullable String budget, Map<String, Long> users, DocumentReference owner) {
         this.name = name;
         this.description = description;
         this.time = time;
@@ -89,7 +88,6 @@ public class Event {
         this.dessert = dessert;
         this.type = type;
         this.budget = budget;
-        this.budgetCurrency = budgetCurrency;
         this.users = users;
         this.owner = owner;
     }
@@ -159,7 +157,7 @@ public class Event {
         this.servings = servings;
     }
 
-    public boolean isAppetizer() {
+    public boolean hasAppetizer() {
         return appetizer;
     }
 
@@ -167,7 +165,7 @@ public class Event {
         this.appetizer = appetizer;
     }
 
-    public boolean isStarter() {
+    public boolean hasStarter() {
         return starter;
     }
 
@@ -175,7 +173,7 @@ public class Event {
         this.starter = starter;
     }
 
-    public boolean isMain() {
+    public boolean hasMain() {
         return main;
     }
 
@@ -183,7 +181,7 @@ public class Event {
         this.main = main;
     }
 
-    public boolean isDessert() {
+    public boolean hasDessert() {
         return dessert;
     }
 
@@ -200,21 +198,12 @@ public class Event {
         this.type = type;
     }
 
-    public float getBudget() {
+    public String getBudget() {
         return budget;
     }
 
-    public void setBudget(float budget) {
+    public void setBudget(String budget) {
         this.budget = budget;
-    }
-
-    @Nullable
-    public String getBudgetCurrency() {
-        return budgetCurrency;
-    }
-
-    public void setBudgetCurrency(@Nullable String budgetCurrency) {
-        this.budgetCurrency = budgetCurrency;
     }
 
     public CollectionReference getContributions() {
@@ -257,10 +246,64 @@ public class Event {
                 ",\n dessert=" + dessert +
                 ",\n type='" + type + '\'' +
                 ",\n budget=" + budget +
-                ",\n budgetCurrency='" + budgetCurrency + '\'' +
                 ",\n contributions=" + contributions +
                 ",\n users=" + users +
                 ",\n owner=" + (owner != null ? owner.getId() : "null") +
                 "\n}";
     }
+
+    protected Event(Parcel in) {
+        id = in.readString();
+        name = in.readString();
+        description = in.readString();
+        time = in.readLong();
+        endTime = in.readLong();
+        location = in.readString();
+        servings = in.readInt();
+        appetizer = in.readByte() != 0x00;
+        starter = in.readByte() != 0x00;
+        main = in.readByte() != 0x00;
+        dessert = in.readByte() != 0x00;
+        type = in.readString();
+        budget = in.readString();
+        contributions = (CollectionReference) in.readValue(CollectionReference.class.getClassLoader());
+        owner = (DocumentReference) in.readValue(DocumentReference.class.getClassLoader());
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(name);
+        dest.writeString(description);
+        dest.writeLong(time);
+        dest.writeLong(endTime);
+        dest.writeString(location);
+        dest.writeInt(servings);
+        dest.writeByte((byte) (appetizer ? 0x01 : 0x00));
+        dest.writeByte((byte) (starter ? 0x01 : 0x00));
+        dest.writeByte((byte) (main ? 0x01 : 0x00));
+        dest.writeByte((byte) (dessert ? 0x01 : 0x00));
+        dest.writeString(type);
+        dest.writeString(budget);
+        dest.writeValue(contributions);
+        dest.writeValue(owner);
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<Event> CREATOR = new Parcelable.Creator<Event>() {
+        @Override
+        public Event createFromParcel(Parcel in) {
+            return new Event(in);
+        }
+
+        @Override
+        public Event[] newArray(int size) {
+            return new Event[size];
+        }
+    };
 }

@@ -36,6 +36,7 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import net.ouftech.whobringswhat.EventCreationActivity;
 import net.ouftech.whobringswhat.R;
 import net.ouftech.whobringswhat.commons.BaseActivity;
 import net.ouftech.whobringswhat.commons.Logger;
@@ -49,6 +50,7 @@ import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
+import butterknife.OnClick;
 import io.fabric.sdk.android.Fabric;
 import io.github.luizgrp.sectionedrecyclerviewadapter.SectionedRecyclerViewAdapter;
 
@@ -75,10 +77,6 @@ public class EventsListActivity extends BaseActivity {
         setSupportActionBar(toolbar);
 
         init();
-
-        fab.setOnClickListener(view -> {
-            FirestoreManager.test();
-        });
 
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if (firebaseUser != null)
@@ -131,6 +129,7 @@ public class EventsListActivity extends BaseActivity {
 
                     updateLoginMenu();
                 });
+
         sectionedAdapter.removeAllSections();
         sectionedAdapter.notifyDataSetChanged();
         emptyMessageTextView.setText(R.string.events_list_empty_message_not_logged_in);
@@ -270,12 +269,14 @@ public class EventsListActivity extends BaseActivity {
 
         runOnUiThread(() -> {
 
-            if (upcomingEvents.isEmpty() && pastEvents.isEmpty() && emptyMessageTextView != null && isRunning()) {
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                emptyMessageTextView.setText((user == null || user.isAnonymous()) ? R.string.events_list_empty_message_not_logged_in : R.string.events_list_empty_message);
-                emptyMessageTextView.setVisibility(View.VISIBLE);
-            } else {
-                emptyMessageTextView.setVisibility(View.GONE);
+            if (emptyMessageTextView != null && isRunning()) {
+                if (upcomingEvents.isEmpty() && pastEvents.isEmpty()) {
+                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                    emptyMessageTextView.setText((user == null || user.isAnonymous()) ? R.string.events_list_empty_message_not_logged_in : R.string.events_list_empty_message);
+                    emptyMessageTextView.setVisibility(View.VISIBLE);
+                } else {
+                    emptyMessageTextView.setVisibility(View.GONE);
+                }
             }
         });
 
@@ -328,6 +329,12 @@ public class EventsListActivity extends BaseActivity {
     private void setProgressBarVisible(final boolean visible) {
         if (isRunning() && progressBar != null)
             runOnUiThread(() -> progressBar.setVisibility(visible ? View.VISIBLE : View.GONE));
+    }
+
+    @OnClick(R.id.fab)
+    public void onViewClicked() {
+        Intent intent = new Intent(this, EventCreationActivity.class);
+        startActivity(intent);
     }
 
     @NonNull

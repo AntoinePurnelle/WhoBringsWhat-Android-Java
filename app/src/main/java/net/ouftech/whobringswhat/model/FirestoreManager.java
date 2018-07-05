@@ -361,7 +361,7 @@ public class FirestoreManager {
                 100,
                 true, true, true, true,
                 "Barbecue",
-                15, "$",
+                "15$",
                 users,
                 db.collection(USERS_COLLECTIONS_NAME).document("apu+user2@ouftech.net")
         );

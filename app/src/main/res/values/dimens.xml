@@ -34,6 +34,7 @@
     <dimen name="text_margin">16dp</dimen>
     <dimen name="icon_default_size">24dp</dimen>
     <dimen name="loading_indicator_size">42dp</dimen>
+    <dimen name="default_elevation">@dimen/smaller</dimen>
 
     <dimen name="event_card_horizontal_margin">@dimen/none</dimen>
     <dimen name="event_card_vertical_margin">@dimen/normal</dimen>
