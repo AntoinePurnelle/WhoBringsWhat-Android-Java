@@ -41,7 +41,7 @@
     <string name="main">Main</string>
     <string name="dessert">Dessert</string>
 
-    <string-array name="planets_array">
+    <string-array name="courses_array">
         <item>@string/appetizer</item>
         <item>@string/starter</item>
         <item>@string/main</item>

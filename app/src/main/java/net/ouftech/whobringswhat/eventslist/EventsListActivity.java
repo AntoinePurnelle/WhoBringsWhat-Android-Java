@@ -263,9 +263,17 @@ public class EventsListActivity extends BaseActivity {
     private void displayEvents(@NonNull List<Event> pastEvents, @NonNull List<Event> upcomingEvents) {
         sectionedAdapter.removeAllSections();
         if (!upcomingEvents.isEmpty())
-            sectionedAdapter.addSection(new EventsSection(upcomingEvents, "Upcoming"));
+            sectionedAdapter.addSection(new EventsSection(upcomingEvents, "Upcoming", position -> {
+                Intent intent = new Intent(EventsListActivity.this, EventCreationActivity.class);
+                intent.putExtra(EventCreationActivity.EVENT_EXTRA, upcomingEvents.get(position));
+                startActivity(intent);
+            }));
         if (!pastEvents.isEmpty())
-            sectionedAdapter.addSection(new EventsSection(pastEvents, "Past"));
+            sectionedAdapter.addSection(new EventsSection(pastEvents, "Upcoming", position -> {
+                Intent intent = new Intent(EventsListActivity.this, EventCreationActivity.class);
+                intent.putExtra(EventCreationActivity.EVENT_EXTRA, pastEvents.get(position));
+                startActivity(intent);
+            }));
 
         runOnUiThread(() -> {
 
@@ -332,7 +340,7 @@ public class EventsListActivity extends BaseActivity {
     }
 
     @OnClick(R.id.fab)
-    public void onViewClicked() {
+    public void onFabClicked() {
         Intent intent = new Intent(this, EventCreationActivity.class);
         startActivity(intent);
     }

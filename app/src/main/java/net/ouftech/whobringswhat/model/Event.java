@@ -25,7 +25,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 
-import java.util.Map;
+import java.util.HashMap;
 
 public class Event implements Parcelable {
 
@@ -49,14 +49,14 @@ public class Event implements Parcelable {
     @Nullable
     private String budget;
     private CollectionReference contributions;
-    private Map<String, Long> users;
+    private HashMap<String, Long> users;
     private DocumentReference owner; // User
 
     public Event() {
         main = true;
     }
 
-    public Event(String id, String name, @Nullable String description, long time, long endTime, @Nullable String location, int servings, boolean appetizer, boolean starter, boolean main, boolean dessert, @Nullable String type, @Nullable String budget, CollectionReference contributions, Map<String, Long> users, DocumentReference owner) {
+    public Event(String id, String name, @Nullable String description, long time, long endTime, @Nullable String location, int servings, boolean appetizer, boolean starter, boolean main, boolean dessert, @Nullable String type, @Nullable String budget, CollectionReference contributions, HashMap<String, Long> users, DocumentReference owner) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -75,7 +75,7 @@ public class Event implements Parcelable {
         this.owner = owner;
     }
 
-    public Event(String name, @Nullable String description, long time, long endTime, @Nullable String location, int servings, boolean appetizer, boolean starter, boolean main, boolean dessert, @Nullable String type, @Nullable String budget, Map<String, Long> users, DocumentReference owner) {
+    public Event(String name, @Nullable String description, long time, long endTime, @Nullable String location, int servings, boolean appetizer, boolean starter, boolean main, boolean dessert, @Nullable String type, @Nullable String budget, HashMap<String, Long> users, DocumentReference owner) {
         this.name = name;
         this.description = description;
         this.time = time;
@@ -214,11 +214,11 @@ public class Event implements Parcelable {
         this.contributions = contributions;
     }
 
-    public Map<String, Long> getUsers() {
+    public HashMap<String, Long> getUsers() {
         return users;
     }
 
-    public void setUsers(Map<String, Long> users) {
+    public void setUsers(HashMap<String, Long> users) {
         this.users = users;
     }
 
@@ -266,8 +266,8 @@ public class Event implements Parcelable {
         dessert = in.readByte() != 0x00;
         type = in.readString();
         budget = in.readString();
-        contributions = (CollectionReference) in.readValue(CollectionReference.class.getClassLoader());
-        owner = (DocumentReference) in.readValue(DocumentReference.class.getClassLoader());
+        users = (HashMap) in.readValue(HashMap.class.getClassLoader());
+        owner = FirestoreManager.getUserReferenceForId(in.readString());
     }
 
     @Override
@@ -290,8 +290,8 @@ public class Event implements Parcelable {
         dest.writeByte((byte) (dessert ? 0x01 : 0x00));
         dest.writeString(type);
         dest.writeString(budget);
-        dest.writeValue(contributions);
-        dest.writeValue(owner);
+        dest.writeValue(users);
+        dest.writeString(owner != null ? owner.getId() : null);
     }
 
     @SuppressWarnings("unused")

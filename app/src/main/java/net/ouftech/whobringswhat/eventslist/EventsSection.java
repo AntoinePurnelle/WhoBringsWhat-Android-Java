@@ -16,6 +16,7 @@
 
 package net.ouftech.whobringswhat.eventslist;
 
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
@@ -32,14 +33,16 @@ public class EventsSection extends StatelessSection {
 
     private List<Event> events;
     private String title;
+    private EventClickListener eventClickListener;
 
-    public EventsSection(List<Event> events, String title) {
+    public EventsSection(@NonNull List<Event> events, @NonNull String title, @NonNull EventClickListener eventClickListener) {
         super(SectionParameters.builder()
                 .itemResourceId(R.layout.event_list_item)
                 .headerResourceId(R.layout.event_list_item_header)
                 .build());
         this.events = events;
         this.title = title;
+        this.eventClickListener = eventClickListener;
     }
 
     @Override
@@ -54,8 +57,10 @@ public class EventsSection extends StatelessSection {
 
     @Override
     public void onBindItemViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (position >= 0 && position < CollectionUtils.getSize(events))
+        if (position >= 0 && position < CollectionUtils.getSize(events)) {
             ((EventListItemViewHolder) holder).bind(events.get(position));
+            ((EventListItemViewHolder) holder).itemView.setOnClickListener(v -> eventClickListener.onEventClicked(position));
+        }
     }
 
     @Override
@@ -65,6 +70,10 @@ public class EventsSection extends StatelessSection {
 
     @Override
     public void onBindHeaderViewHolder(RecyclerView.ViewHolder holder) {
-        ((EventListItemHeaderViewHolder)holder).bind(title);
+        ((EventListItemHeaderViewHolder) holder).bind(title);
+    }
+
+    public interface EventClickListener {
+        void onEventClicked(int position);
     }
 }

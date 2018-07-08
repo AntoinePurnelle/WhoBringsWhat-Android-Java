@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class FirestoreManager {
 
@@ -41,6 +40,17 @@ public class FirestoreManager {
 
 
     // region Users
+
+    /**
+     * Returns the reference of a User Document based on its ID.<br/>
+     * DOESN'T check if the document exists!
+     *
+     * @param id ID of the document
+     * @return {@link DocumentReference} of the user with the given id
+     */
+    public static DocumentReference getUserReferenceForId(@NonNull String id) {
+        return db.collection(USERS_COLLECTIONS_NAME).document(id);
+    }
 
     /**
      * Fetches a {@link User} item from Firestore using its Firebase Auth id<br/>
@@ -146,6 +156,17 @@ public class FirestoreManager {
     // region Events
 
     /**
+     * Returns the reference of a Event Document based on its ID.<br/>
+     * DOESN'T check if the document exists!
+     *
+     * @param id ID of the document
+     * @return {@link DocumentReference} of the event with the given id
+     */
+    public static DocumentReference getEventReferenceForId(@NonNull String id) {
+        return db.collection(EVENTS_COLLECTIONS_NAME).document(id);
+    }
+
+    /**
      * Fetches a {@link Event} item from Firestore using its id<br/>
      *
      * @param id       id of the {@link Event} document to fetch
@@ -174,7 +195,7 @@ public class FirestoreManager {
      * Fetches the list of events for the given {@link User} object.<br/>
      * Events are ordered by start date ({@link Event#time})
      *
-     * @param userId     id {@link User} object from which to get the events
+     * @param userId   id {@link User} object from which to get the events
      * @param listener Query Listener for success and failure callbacks
      */
     public static void fetchEventsForUser(@NonNull String userId, @NonNull EventsQueryListener listener) {
@@ -221,9 +242,7 @@ public class FirestoreManager {
     }
 
     /**
-     * Saves {@link Event} document to Firestore.<br/>
-     * CAUTION: This method will save every field of the {@link Event} object to save them in Firestore, even the NULL ones!<br/>
-     * Calling this method will replace anything stored on Firestore for that document.
+     * Creates a {@link Event} document on Firestore.<br/>
      *
      * @param event    {@link Event} to save as a Firestore document
      * @param listener Query Listener for success and failure callbacks
@@ -232,9 +251,26 @@ public class FirestoreManager {
         DocumentReference documentReference = db.collection(EVENTS_COLLECTIONS_NAME).document();
         event.setId(documentReference.getId());
         event.setOwner(db.collection(USERS_COLLECTIONS_NAME).document(currentUser.getFirebaseId()));
-        Map<String, Long> users = new HashMap<>();
+        HashMap<String, Long> users = new HashMap<>();
         users.put(currentUser.getFirebaseId(), event.getTime());
         event.setUsers(users);
+
+        documentReference
+                .set(event)
+                .addOnSuccessListener(listener::onSuccess)
+                .addOnFailureListener(listener::onFailure);
+    }
+
+    /**
+     * Updates the  {@link Event} document to Firestore.<br/>
+     * CAUTION: This method will save every field of the {@link Event} object to save them in Firestore, even the NULL ones!<br/>
+     * Calling this method will replace anything stored on Firestore for that document.
+     *
+     * @param event    {@link Event} to save as a Firestore document
+     * @param listener Query Listener for success and failure callbacks
+     */
+    public static void updateEvent(@NonNull Event event, @NonNull AddListener listener) {
+        DocumentReference documentReference = db.collection(EVENTS_COLLECTIONS_NAME).document(event.getId());
 
         documentReference
                 .set(event)
@@ -246,6 +282,17 @@ public class FirestoreManager {
 
 
     // region Contributions
+
+    /**
+     * Returns the reference of a Contribution Document based on its ID.<br/>
+     * DOESN'T check if the document exists!
+     *
+     * @param id ID of the document
+     * @return {@link DocumentReference} of the contribution with the given id
+     */
+    public static DocumentReference getContributionReferenceForId(@NonNull String id) {
+        return db.collection(CONTRIBUTIONS_COLLECTIONS_NAME).document(id);
+    }
 
     /**
      * Fetches the {@link Contribution} objects of the "contributions" collection in the given {@link Event}<br/>
@@ -355,7 +402,7 @@ public class FirestoreManager {
 
     public static void testAddEvent() {
         long date = new Date().getTime();
-        Map<String, Long> users = new HashMap<>();
+        HashMap<String, Long> users = new HashMap<>();
         users.put("2222", date);
         Event event = new Event(
                 "Event 3",

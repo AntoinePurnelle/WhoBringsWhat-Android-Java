@@ -73,7 +73,7 @@ public class EventCreationActivity extends BaseActivity {
     private long startDate = 0;
     @State
     private long endDate = 0;
-    @State
+    @State // Whether it's a new event or the update of an existing one
     private boolean eventCreation = false;
 
     @Override
@@ -106,8 +106,16 @@ public class EventCreationActivity extends BaseActivity {
         courses = new boolean[]{event.hasAppetizer(), event.hasStarter(), event.hasMain(), event.hasDessert()};
         updateSelectedCourses();
         budgetEt.setText(event.getBudget());
+        if (event.getServings() > 0)
+            servingsEt.setText(String.valueOf(event.getServings()));
     }
 
+    /**
+     * Displays the given date into the given EditText with the device FateTime format
+     *
+     * @param date     DateTime to display
+     * @param editText EditText on which to display the DateTime
+     */
     private void displayDate(long date, @NonNull EditText editText) {
         String dateString = date > 0 ? DateUtils.formatDateTime(this, date, DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NUMERIC_DATE | DateUtils.FORMAT_SHOW_TIME) : "";
         editText.setText(dateString);
@@ -129,7 +137,13 @@ public class EventCreationActivity extends BaseActivity {
         });
     }
 
-    public void showDateTimePicker(long dateTime, DateTimePickerListener listener) {
+    /**
+     * Displays a {@link DatePickerDialog} then  a {@link TimePickerDialog} and returns the result to the Listener
+     *
+     * @param dateTime Date and time to which the pickers must be initialized. If 0, pickers will be set to now
+     * @param listener {@link DateTimePickerListener} Listener to which to return the picked date time
+     */
+    public void showDateTimePicker(long dateTime, @NonNull DateTimePickerListener listener) {
         final Calendar date = Calendar.getInstance();
         if (dateTime > 0)
             date.setTimeInMillis(dateTime);
@@ -148,9 +162,10 @@ public class EventCreationActivity extends BaseActivity {
 
     @OnClick(R.id.event_creation_courses_et)
     public void onCoursesEtClicked() {
+        // Open multiselect dialog with titles and selected choices
         new AlertDialog.Builder(this)
                 .setTitle(R.string.courses)
-                .setMultiChoiceItems(getResources().getStringArray(R.array.planets_array), courses, (dialog, which, isChecked) -> {
+                .setMultiChoiceItems(getResources().getStringArray(R.array.courses_array), courses, (dialog, which, isChecked) -> {
                     courses[which] = isChecked;
                     updateSelectedCourses();
                 })
@@ -158,11 +173,14 @@ public class EventCreationActivity extends BaseActivity {
                 .create().show();
     }
 
+    /**
+     * Displays the selected courses in the EditText
+     */
     private void updateSelectedCourses() {
         List<String> selectedCourses = new ArrayList<>();
         for (int i = 0; i < courses.length; i++) {
             if (courses[i])
-                selectedCourses.add(getResources().getStringArray(R.array.planets_array)[i]);
+                selectedCourses.add(getResources().getStringArray(R.array.courses_array)[i]);
         }
         coursesEt.setText(TextUtils.join(", ", selectedCourses));
     }
@@ -170,22 +188,6 @@ public class EventCreationActivity extends BaseActivity {
     @OnClick(R.id.event_creation_save_button)
     public void onSaveButtonClicked() {
         if (checkValidity()) {
-            if (endDate > 0 && endDate <= startDate) {
-                showWarning(R.string.enddate_cannot_be_before_startdate);
-                return;
-            }
-
-            if (!TextUtils.isEmpty(servingsEt.getText().toString())) {
-                int servings;
-                try {
-                    servings = Integer.parseInt(servingsEt.getText().toString());
-                    event.setServings(servings);
-                } catch (NumberFormatException e) {
-                    showWarning(R.string.please_enter_valid_servings);
-                    return;
-                }
-            }
-
             event.setName(nameEt.getText().toString());
             event.setDescription(descriptionEt.getText().toString());
             event.setTime(startDate);
@@ -197,6 +199,7 @@ public class EventCreationActivity extends BaseActivity {
             event.setMain(courses[2]);
             event.setDessert(courses[3]);
             event.setBudget(budgetEt.getText().toString());
+            event.setServings(Integer.parseInt(servingsEt.getText().toString()));
 
             if (eventCreation) {
                 Logger.d(getLogTag(), String.format("Creating event %s", event));
@@ -205,6 +208,22 @@ public class EventCreationActivity extends BaseActivity {
                     public void onSuccess(Void aVoid) {
                         Logger.d(getLogTag(), "Event created");
                         Toast.makeText(EventCreationActivity.this, R.string.event_created, Toast.LENGTH_LONG).show();
+                        // TODO open EventDetailsActivity
+                        finish();
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        showWarning(R.string.an_error_occurred);
+                    }
+                });
+            } else {
+                Logger.d(getLogTag(), String.format("Creating event %s", event));
+                FirestoreManager.updateEvent(event, new FirestoreManager.AddListener() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Logger.d(getLogTag(), "Event saved");
+                        Toast.makeText(EventCreationActivity.this, R.string.event_saved, Toast.LENGTH_LONG).show();
                         finish();
                     }
 
@@ -217,7 +236,14 @@ public class EventCreationActivity extends BaseActivity {
         }
     }
 
+    /**
+     * Check if mandatory fields are filled and their values are valid.<br/>
+     * Displays an error if there is an error.
+     *
+     * @return true if all mandatory fields are filled and values are valid. False otherwise.
+     */
     private boolean checkValidity() {
+        // Checks all mandatory fields are filled
         if (nameEt.getText().length() == 0
                 || startTimeEt.getText().length() == 0
                 || locationEt.getText().length() == 0
@@ -225,9 +251,31 @@ public class EventCreationActivity extends BaseActivity {
             showWarning(R.string.please_fill_non_optional);
             return false;
         }
+
+        // Checks that if there's an end date, it is after the start date
+        if (endDate > 0 && endDate <= startDate) {
+            showWarning(R.string.enddate_cannot_be_before_startdate);
+            return false;
+        }
+
+        // Checks that the value in the servings EditText is an integer
+        if (!TextUtils.isEmpty(servingsEt.getText().toString())) {
+            try {
+                Integer.parseInt(servingsEt.getText().toString());
+            } catch (NumberFormatException e) {
+                showWarning(R.string.please_enter_valid_servings);
+                return false;
+            }
+        }
+
         return true;
     }
 
+    /**
+     * Displays a Snackbar with the given message
+     *
+     * @param message Message to display
+     */
     private void showWarning(@StringRes int message) {
         Snackbar.make(saveButton, message, Snackbar.LENGTH_LONG).show();
     }
