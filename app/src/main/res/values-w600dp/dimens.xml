@@ -18,7 +18,7 @@
 
 <resources>
 
-    <dimen name="event_card_horizontal_margin">64dp</dimen>
-    <dimen name="event_card_vertical_margin">@dimen/large</dimen>
+    <dimen name="card_horizontal_margin">64dp</dimen>
+    <dimen name="card_vertical_margin">@dimen/large</dimen>
 
 </resources>

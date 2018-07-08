@@ -16,7 +16,7 @@
   ~ limitations under the License.
   -->
 
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -50,24 +50,8 @@
         <item name="android:background">#fff</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginLeft">8dp</item>
-        <item name="android:layout_marginRight">8dp</item>
-        <item name="android:elevation" tools:targetApi="lollipop">4dp</item>
-    </style>
-
-    <style name="ElevatedHeader" parent="ElevatedView">
-        <item name="android:textColor">?colorPrimary</item>
-        <item name="android:paddingBottom">4dp</item>
-        <item name="android:paddingTop">4dp</item>
-        <item name="android:layout_marginTop">8dp</item>
-    </style>
-
-    <style name="ElevatedFooter" parent="ElevatedView">
-        <item name="android:textColor">?colorAccent</item>
-        <item name="android:paddingBottom">4dp</item>
-        <item name="android:paddingTop">4dp</item>
-        <item name="android:paddingEnd">16dp</item>
-        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:layout_marginLeft">@dimen/card_horizontal_margin</item>
+        <item name="android:layout_marginRight">@dimen/card_horizontal_margin</item>
     </style>
 
 
@@ -88,10 +72,10 @@
     </style>
 
     <style name="ContributionImage">
-        <item name="android:layout_width">56dp</item>
-        <item name="android:layout_height">56dp</item>
+        <item name="android:layout_width">48dp</item>
+        <item name="android:layout_height">48dp</item>
         <item name="android:layout_gravity">center</item>
-        <item name="android:layout_margin">8dp</item>
+        <item name="android:layout_margin">@dimen/normal</item>
     </style>
 
     <style name="ContributionImageFood" parent="ContributionImage">

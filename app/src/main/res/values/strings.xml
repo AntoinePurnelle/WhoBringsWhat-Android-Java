@@ -41,6 +41,11 @@
     <string name="main">Main</string>
     <string name="dessert">Dessert</string>
 
+    <string name="upcoming">Upcoming</string>
+    <string name="past">Past</string>
+
+    <string name="add_contribution">Add contribution</string>
+
     <string-array name="courses_array">
         <item>@string/appetizer</item>
         <item>@string/starter</item>

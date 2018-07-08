@@ -289,7 +289,7 @@ public class EventCreationActivity extends BaseActivity {
 
     @Override
     protected int getLayoutId() {
-        return R.layout.event_creation;
+        return R.layout.activity_event_creation;
     }
 
     public Event getEvent() {

@@ -37,6 +37,9 @@
     <string name="starter">Entrée</string>
     <string name="main">Plat principal</string>
     <string name="dessert">Dessert</string>
+    <string name="upcoming">À venir</string>
+    <string name="past">Passés</string>
+    <string name="add_contribution">Ajouter une contribution</string>
     <string name="please_fill_non_optional">Merci de remplir tous les champs non facultatifs</string>
     <string name="please_enter_valid_servings">Merci de remplir un nombre de couverts valide</string>
     <string name="enddate_cannot_be_before_startdate">La fin ne peut pas être avant le début</string>
