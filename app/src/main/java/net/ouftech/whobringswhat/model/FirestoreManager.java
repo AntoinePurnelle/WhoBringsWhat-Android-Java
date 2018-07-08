@@ -231,6 +231,10 @@ public class FirestoreManager {
     public static void addEvent(@NonNull Event event, @NonNull AddListener listener) {
         DocumentReference documentReference = db.collection(EVENTS_COLLECTIONS_NAME).document();
         event.setId(documentReference.getId());
+        event.setOwner(db.collection(USERS_COLLECTIONS_NAME).document(currentUser.getFirebaseId()));
+        Map<String, Long> users = new HashMap<>();
+        users.put(currentUser.getFirebaseId(), event.getTime());
+        event.setUsers(users);
 
         documentReference
                 .set(event)

@@ -33,6 +33,8 @@
 
     <string name="create_event">Create event</string>
     <string name="save_event">Save event</string>
+    <string name="event_created">Event created</string>
+    <string name="event_saved">Event saved</string>
 
     <string name="appetizer">Appetizer</string>
     <string name="starter">Starter</string>
@@ -47,6 +49,9 @@
     </string-array>
 
     <string name="please_fill_non_optional">Please fill all the non-optional fields</string>
+    <string name="please_enter_valid_servings">Please enter a valid number of servings</string>
+    <string name="enddate_cannot_be_before_startdate">End date cannot be before start date</string>
+    <string name="an_error_occurred">An error occurred. Please try again</string>
 
     <string name="login_error_dialog_message">An error occurred while trying to log you in. Please try again</string>
     <string name="login_error_dialog_title">Login error</string>
