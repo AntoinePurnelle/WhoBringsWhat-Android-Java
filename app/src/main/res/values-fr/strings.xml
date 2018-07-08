@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Copyright 2018 Antoine PURNELLE
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     https://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<resources>
+    <string name="app_name">Qui Apporte Quoi</string>
+    <string name="login">Connexion</string>
+    <string name="logout">Déconnexion</string>
+    <string name="not_now">Pas maintenant</string>
+    <string name="name">Nom</string>
+    <string name="start_time">Début</string>
+    <string name="end_time_optional">Fin (facultatif)</string>
+    <string name="description_optional">Desctiption (facultatif)</string>
+    <string name="location">Lieu</string>
+    <string name="servings_optional">Couverts (facultatif)</string>
+    <string name="budget_optional">Budget (facultatif)</string>
+    <string name="courses">Services</string>
+    <string name="create_event">Créer un événement</string>
+    <string name="save_event">Sauver l\'événement</string>
+    <string name="event_created">Événement créé</string>
+    <string name="event_saved">Événement sauvé</string>
+    <string name="appetizer">Apéritif</string>
+    <string name="starter">Entrée</string>
+    <string name="main">Plat principal</string>
+    <string name="dessert">Dessert</string>
+    <string name="please_fill_non_optional">Merci de remplir tous les champs non facultatifs</string>
+    <string name="please_enter_valid_servings">Merci de remplir un nombre de couverts valide</string>
+    <string name="enddate_cannot_be_before_startdate">La fin ne peut pas être avant le début</string>
+    <string name="an_error_occurred">Une erreur s\'est produite. Veuillez réessayer</string>
+    <string name="login_error_dialog_message">Use erreur s\'ets produite lors de la connection. Veuillez réessayer</string>
+    <string name="login_error_dialog_title">Erreur de connexion</string>
+    <string name="login_dialog_title">Connexion à Qui Apporte Quoi</string>
+    <string name="login_dialog_message">En vous connectant, vous vous assurez de sauver les événements auxquels vous participez. Vous pourrez les retrouver à chaque fois que vous vous connectez à Qui Apporte Quoi</string>
+    <string name="events_list_empty_message">Aucun événement à afficher. Appuyez sur le bouton + pour en créer un</string>
+    <string name="events_list_empty_message_not_logged_in">Aucun événement à afficher. Connectez-vous ou appuyez sur le bouton + pour en créer un</string>
+</resources>

@@ -199,7 +199,8 @@ public class EventCreationActivity extends BaseActivity {
             event.setMain(courses[2]);
             event.setDessert(courses[3]);
             event.setBudget(budgetEt.getText().toString());
-            event.setServings(Integer.parseInt(servingsEt.getText().toString()));
+            if (!TextUtils.isEmpty(servingsEt.getText().toString()))
+                event.setServings(Integer.parseInt(servingsEt.getText().toString()));
 
             if (eventCreation) {
                 Logger.d(getLogTag(), String.format("Creating event %s", event));
