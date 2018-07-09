@@ -23,11 +23,6 @@
     android:orientation="horizontal"
     android:background="@drawable/shadow_item">
 
-    <View
-        android:layout_width="@dimen/normal"
-        android:layout_height="match_parent"
-        android:background="@drawable/shadow_left" />
-
     <ImageView style="@style/ContributionImageFood" />
 
     <LinearLayout
@@ -73,10 +68,5 @@
 
 
     </LinearLayout>
-
-    <View
-        android:layout_width="@dimen/normal"
-        android:layout_height="match_parent"
-        android:background="@drawable/shadow_right" />
 
 </LinearLayout>
