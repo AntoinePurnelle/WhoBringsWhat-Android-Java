@@ -209,7 +209,7 @@ public class EventCreationActivity extends BaseActivity {
                     public void onSuccess(Void aVoid) {
                         Logger.d(getLogTag(), "Event created");
                         Toast.makeText(EventCreationActivity.this, R.string.event_created, Toast.LENGTH_LONG).show();
-                        // TODO open EventDetailsActivity
+                        // TODO open EventContentActivity
                         finish();
                     }
 

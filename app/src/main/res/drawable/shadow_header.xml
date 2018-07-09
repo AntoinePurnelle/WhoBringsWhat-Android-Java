@@ -53,7 +53,7 @@
         </shape>
     </item>
 
-    <item
+    <!--<item
         android:right="4dp"
         android:left="4dp"
         android:bottom="0dp"
@@ -91,13 +91,13 @@
         <shape android:shape="rectangle">
             <solid android:color="@color/gradient_shadow" />
         </shape>
-    </item>
+    </item>-->
 
     <item
-        android:right="8dp"
-        android:left="8dp"
+        android:right="4dp"
+        android:left="4dp"
         android:bottom="0dp"
-        android:top="8dp">
+        android:top="4dp">
         <shape android:shape="rectangle">
             <solid android:color="#fff" />
         </shape>

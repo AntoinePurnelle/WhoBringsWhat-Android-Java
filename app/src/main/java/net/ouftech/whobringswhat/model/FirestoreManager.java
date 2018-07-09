@@ -456,7 +456,9 @@ public class FirestoreManager {
                         11, 11, "plates",
                         "main",
                         "Comment C1E3",
-                        db.collection(USERS_COLLECTIONS_NAME).document("apu+user2@ouftech.net")
+                        db.collection(USERS_COLLECTIONS_NAME).document("apu+user2@ouftech.net"),
+                        "User 2",
+                        true
                 );
 
                 addContribution(event, contribution, new AddListener() {

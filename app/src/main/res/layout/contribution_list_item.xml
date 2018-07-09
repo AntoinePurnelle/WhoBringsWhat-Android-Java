@@ -23,7 +23,9 @@
     android:orientation="horizontal"
     android:background="@drawable/shadow_item">
 
-    <ImageView style="@style/ContributionImageFood" />
+    <ImageView
+        android:id="@+id/contribution_image_iv"
+        style="@style/ContributionImageFood" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -34,6 +36,7 @@
         android:padding="16dp">
 
         <TextView
+            android:id="@+id/contribution_name_tv"
             style="@style/TextTitle"
             tools:text="Pizza" />
 
@@ -43,6 +46,7 @@
             android:gravity="center">
 
             <TextView
+                android:id="@+id/contribution_contributor_tv"
                 style="@style/TextSecondary"
                 android:textColor="@color/colorPrimaryDark"
                 tools:text="Alex" />
@@ -52,13 +56,14 @@
                 android:layout_height="0dp"
                 android:layout_weight="1" />
 
-            <ImageView
+            <android.support.v7.widget.AppCompatImageView
+                android:id="@+id/contribution_servings_iv"
                 android:layout_width="@dimen/icon_default_size"
                 android:layout_height="@dimen/icon_default_size"
                 app:srcCompat="@drawable/ic_people_black_24dp" />
 
             <TextView
-                android:id="@+id/event_item_servings_tv"
+                android:id="@+id/contribution_servings_tv"
                 style="@style/TextSecondary"
                 android:paddingEnd="@dimen/small"
                 android:paddingStart="@dimen/small"

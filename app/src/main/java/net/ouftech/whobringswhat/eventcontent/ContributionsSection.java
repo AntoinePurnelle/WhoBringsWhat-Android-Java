@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package net.ouftech.whobringswhat.eventslist;
+package net.ouftech.whobringswhat.eventcontent;
 
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -22,59 +22,71 @@ import android.view.View;
 
 import net.ouftech.whobringswhat.R;
 import net.ouftech.whobringswhat.commons.CollectionUtils;
-import net.ouftech.whobringswhat.model.Event;
+import net.ouftech.whobringswhat.model.Contribution;
 
 import java.util.List;
 
 import io.github.luizgrp.sectionedrecyclerviewadapter.SectionParameters;
 import io.github.luizgrp.sectionedrecyclerviewadapter.StatelessSection;
 
-public class EventsSection extends StatelessSection {
+public class ContributionsSection extends StatelessSection {
 
-    private List<Event> events;
+    private List<Contribution> contributions;
     private String title;
-    private EventClickListener eventClickListener;
+    private ContributionClickListener listener;
 
-    public EventsSection(@NonNull List<Event> events, @NonNull String title, @NonNull EventClickListener eventClickListener) {
+    public ContributionsSection(@NonNull List<Contribution> contributions, @NonNull String title, @NonNull ContributionClickListener listener) {
         super(SectionParameters.builder()
-                .itemResourceId(R.layout.event_list_item)
-                .headerResourceId(R.layout.event_list_item_header)
+                .itemResourceId(R.layout.contribution_list_item)
+                .headerResourceId(R.layout.contribution_list_header)
+                .footerResourceId(R.layout.contribution_list_footer)
                 .build());
 
-        this.events = events;
+        this.contributions = contributions;
         this.title = title;
-        this.eventClickListener = eventClickListener;
+        this.listener = listener;
     }
 
     @Override
     public int getContentItemsTotal() {
-        return CollectionUtils.getSize(events);
+        return CollectionUtils.getSize(contributions);
     }
 
     @Override
     public RecyclerView.ViewHolder getItemViewHolder(View view) {
-        return new EventListItemViewHolder(view);
+        return new ContributionViewHolder(view);
     }
 
     @Override
     public void onBindItemViewHolder(RecyclerView.ViewHolder holder, int position) {
-        if (position >= 0 && position < CollectionUtils.getSize(events)) {
-            ((EventListItemViewHolder) holder).bind(events.get(position));
-            ((EventListItemViewHolder) holder).itemView.setOnClickListener(v -> eventClickListener.onEventClicked(position));
+        if (position >= 0 && position < CollectionUtils.getSize(contributions)) {
+            ((ContributionViewHolder) holder).bind(contributions.get(position));
         }
     }
 
     @Override
     public RecyclerView.ViewHolder getHeaderViewHolder(View view) {
-        return new EventListItemHeaderViewHolder(view);
+        return new ContributionHeaderViewHolder(view);
     }
 
     @Override
     public void onBindHeaderViewHolder(RecyclerView.ViewHolder holder) {
-        ((EventListItemHeaderViewHolder) holder).bind(title);
+        ((ContributionHeaderViewHolder) holder).bind(title);
     }
 
-    public interface EventClickListener {
-        void onEventClicked(int position);
+    @Override
+    public RecyclerView.ViewHolder getFooterViewHolder(View view) {
+        return new ContributionFooterViewHolder(view);
+    }
+
+    @Override
+    public void onBindFooterViewHolder(RecyclerView.ViewHolder holder) {
+        ((ContributionFooterViewHolder)holder).getFooterTv().setOnClickListener(v -> listener.onAddContributionClicked());
+    }
+
+    public interface ContributionClickListener {
+        void onEditContributionClicked(int position);
+
+        void onAddContributionClicked();
     }
 }

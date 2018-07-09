@@ -40,6 +40,7 @@ import net.ouftech.whobringswhat.EventCreationActivity;
 import net.ouftech.whobringswhat.R;
 import net.ouftech.whobringswhat.commons.BaseActivity;
 import net.ouftech.whobringswhat.commons.Logger;
+import net.ouftech.whobringswhat.eventcontent.EventContentActivity;
 import net.ouftech.whobringswhat.model.Event;
 import net.ouftech.whobringswhat.model.FirestoreManager;
 import net.ouftech.whobringswhat.model.User;
@@ -264,14 +265,14 @@ public class EventsListActivity extends BaseActivity {
         sectionedAdapter.removeAllSections();
         if (!upcomingEvents.isEmpty())
             sectionedAdapter.addSection(new EventsSection(upcomingEvents, "Upcoming", position -> {
-                Intent intent = new Intent(EventsListActivity.this, EventCreationActivity.class);
-                intent.putExtra(EventCreationActivity.EVENT_EXTRA, upcomingEvents.get(position));
+                Intent intent = new Intent(EventsListActivity.this, EventContentActivity.class);
+                intent.putExtra(EventContentActivity.EVENT_EXTRA, upcomingEvents.get(position));
                 startActivity(intent);
             }));
         if (!pastEvents.isEmpty())
             sectionedAdapter.addSection(new EventsSection(pastEvents, "Upcoming", position -> {
-                Intent intent = new Intent(EventsListActivity.this, EventCreationActivity.class);
-                intent.putExtra(EventCreationActivity.EVENT_EXTRA, pastEvents.get(position));
+                Intent intent = new Intent(EventsListActivity.this, EventContentActivity.class);
+                intent.putExtra(EventContentActivity.EVENT_EXTRA, pastEvents.get(position));
                 startActivity(intent);
             }));
 

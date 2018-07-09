@@ -16,12 +16,23 @@
 
 package net.ouftech.whobringswhat.model;
 
+import android.content.Context;
+import android.os.Parcel;
+import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 
-public class Contribution {
+import net.ouftech.whobringswhat.R;
+
+public class Contribution implements Parcelable {
+
+    public static final String CONTRIBUTION_TYPE_APPETIZER = "appetizer";
+    public static final String CONTRIBUTION_TYPE_STARTER = "starter";
+    public static final String CONTRIBUTION_TYPE_MAIN = "main";
+    public static final String CONTRIBUTION_TYPE_DESSERT = "dessert";
 
     private String id;
     private String name;
@@ -31,14 +42,15 @@ public class Contribution {
     private String unit;
     private String type;
     @Nullable
-    private String comment ;
+    private String comment;
     private DocumentReference user;
+    private String contributor;
+    private boolean isDrink;
 
     public Contribution() {
     }
 
-    public Contribution(String id, String name, int servings, int quantity, @Nullable String unit, String type, @Nullable String comment, DocumentReference user) {
-        this.id = id;
+    public Contribution(String name, int servings, int quantity, @Nullable String unit, String type, @Nullable String comment, DocumentReference user, String contributor, boolean isDrink) {
         this.name = name;
         this.servings = servings;
         this.quantity = quantity;
@@ -46,21 +58,17 @@ public class Contribution {
         this.type = type;
         this.comment = comment;
         this.user = user;
-    }
-
-    public Contribution(String name, int servings, int quantity, @Nullable String unit, String type, @Nullable String comment, DocumentReference user) {
-        this.name = name;
-        this.servings = servings;
-        this.quantity = quantity;
-        this.unit = unit;
-        this.type = type;
-        this.comment = comment;
-        this.user = user;
+        this.contributor = contributor;
+        this.isDrink = isDrink;
     }
 
     public static Contribution fromDocument(DocumentSnapshot documentSnapshot) {
         Contribution contribution = documentSnapshot.toObject(Contribution.class);
-        contribution.id = documentSnapshot.getId();
+        if (contribution != null) {
+            contribution.id = documentSnapshot.getId();
+            Boolean isDrink = (Boolean) documentSnapshot.getData().get("isDrink");
+            contribution.isDrink = isDrink != null && isDrink;
+        }
         return contribution;
     }
 
@@ -105,8 +113,9 @@ public class Contribution {
         this.unit = unit;
     }
 
+    @NonNull
     public String getType() {
-        return type;
+        return type != null ? type : CONTRIBUTION_TYPE_MAIN;
     }
 
     public void setType(String type) {
@@ -130,6 +139,44 @@ public class Contribution {
         this.user = user;
     }
 
+    public String getContributor() {
+        return contributor;
+    }
+
+    public void setContributor(String contributor) {
+        this.contributor = contributor;
+    }
+
+    public boolean isDrink() {
+        return isDrink;
+    }
+
+    public void setIsDrink(boolean isDrink) {
+        isDrink = isDrink;
+    }
+
+    public void setIsDrink(Boolean isDrink) {
+        isDrink = isDrink;
+    }
+
+    @NonNull
+    public String getTypePrint(@NonNull Context context) {
+        if (type == null)
+            return context.getString(R.string.main);
+
+        switch (type) {
+            case Contribution.CONTRIBUTION_TYPE_APPETIZER:
+                return context.getString(R.string.appetizer);
+            case Contribution.CONTRIBUTION_TYPE_STARTER:
+                return context.getString(R.string.starter);
+            case Contribution.CONTRIBUTION_TYPE_DESSERT:
+                return context.getString(R.string.dessert);
+            case Contribution.CONTRIBUTION_TYPE_MAIN:
+            default:
+                return context.getString(R.string.main);
+        }
+    }
+
     @Override
     public String toString() {
         return "Contribution{" +
@@ -141,6 +188,53 @@ public class Contribution {
                 ",\n type='" + type + '\'' +
                 ",\n comment='" + comment + '\'' +
                 ",\n user=" + user.getId() +
+                ",\n contributor=" + contributor +
+                ",\n isDrink=" + isDrink +
                 "\n}";
     }
+
+    protected Contribution(Parcel in) {
+        id = in.readString();
+        name = in.readString();
+        servings = in.readInt();
+        quantity = in.readInt();
+        unit = in.readString();
+        type = in.readString();
+        comment = in.readString();
+        user = FirestoreManager.getUserReferenceForId(in.readString());
+        contributor = in.readString();
+        isDrink = in.readByte() != 0x00;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(id);
+        dest.writeString(name);
+        dest.writeInt(servings);
+        dest.writeInt(quantity);
+        dest.writeString(unit);
+        dest.writeString(type);
+        dest.writeString(comment);
+        dest.writeString(user != null ? user.getId() : null);
+        dest.writeString(contributor);
+        dest.writeByte((byte) (isDrink ? 0x01 : 0x00));
+    }
+
+    @SuppressWarnings("unused")
+    public static final Parcelable.Creator<Contribution> CREATOR = new Parcelable.Creator<Contribution>() {
+        @Override
+        public Contribution createFromParcel(Parcel in) {
+            return new Contribution(in);
+        }
+
+        @Override
+        public Contribution[] newArray(int size) {
+            return new Contribution[size];
+        }
+    };
 }
