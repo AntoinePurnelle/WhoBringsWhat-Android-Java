@@ -6,4 +6,4 @@
     android:layout_gravity="center"
     android:background="@drawable/shadow_item"
     android:paddingTop="@dimen/normal"
-    android:paddingBTop="@dimen/normal"/>
+    android:paddingBottom="@dimen/normal"/>
