@@ -16,6 +16,7 @@
 
 package net.ouftech.whobringswhat.eventcontent;
 
+import android.content.res.Resources;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -40,6 +41,16 @@ public class EventDetailsViewHolder extends RecyclerView.ViewHolder {
     TextView locationTv;
     @BindView(R.id.event_details_location_ll)
     LinearLayout locationLl;
+    @BindView(R.id.event_details_end_date_tv)
+    TextView endDateTv;
+    @BindView(R.id.event_details_servings_tv)
+    TextView servingsTv;
+    @BindView(R.id.event_details_servings_ll)
+    LinearLayout servingsLl;
+    @BindView(R.id.event_details_budget_tv)
+    TextView budgetTv;
+    @BindView(R.id.event_details_budget_ll)
+    LinearLayout budgetLl;
 
     public EventDetailsViewHolder(View itemView) {
         super(itemView);
@@ -48,13 +59,32 @@ public class EventDetailsViewHolder extends RecyclerView.ViewHolder {
 
     public void bind(@NonNull Event event) {
         descriptionTv.setText(event.getDescription());
-        String dateString = event.getTime() > 0 ? DateUtils.formatDateTime(itemView.getContext(), event.getTime(), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NUMERIC_DATE | DateUtils.FORMAT_SHOW_TIME) : "";
+
+        Resources res = itemView.getResources();
+        String dateString = event.getTime() > 0 ? res.getString(R.string.from) + " " + DateUtils.formatDateTime(itemView.getContext(), event.getTime(), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NUMERIC_DATE | DateUtils.FORMAT_SHOW_TIME) : "";
         dateTv.setText(dateString);
+        dateString = event.getEndTime() > 0 ? res.getString(R.string.to) + " " + DateUtils.formatDateTime(itemView.getContext(), event.getTime(), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NUMERIC_DATE | DateUtils.FORMAT_SHOW_TIME) : null;
+        endDateTv.setText(dateString);
+
         if (TextUtils.isEmpty(event.getLocation())) {
             locationLl.setVisibility(View.GONE);
         } else {
-            locationLl.setVisibility(View.GONE);
+            locationLl.setVisibility(View.VISIBLE);
             locationTv.setText(event.getLocation());
+        }
+
+        if (event.getServings() > 0) {
+            servingsLl.setVisibility(View.VISIBLE);
+            servingsTv.setText(String.valueOf(event.getServings()));
+        } else {
+            servingsLl.setVisibility(View.GONE);
+        }
+
+        if (TextUtils.isEmpty(event.getBudget())) {
+            budgetLl.setVisibility(View.GONE);
+        } else {
+            budgetLl.setVisibility(View.VISIBLE);
+            budgetTv.setText(event.getBudget());
         }
     }
 

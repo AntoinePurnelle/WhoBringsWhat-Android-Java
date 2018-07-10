@@ -22,8 +22,8 @@
     style="@style/ElevatedView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/shadow_card"
     android:layout_marginTop="@dimen/large"
+    android:background="@drawable/shadow_card"
     android:orientation="vertical"
     android:padding="@dimen/shadowed_card_padding">
 
@@ -33,6 +33,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:gravity="center"
+        android:paddingBottom="@dimen/normal"
         tools:text="An event to  celebrate all the Nanodegrees that were handed during the Scholarship" />
 
     <LinearLayout
@@ -40,7 +41,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:paddingTop="@dimen/normal">
+        android:paddingTop="@dimen/large">
 
         <android.support.v7.widget.AppCompatImageView
             android:id="@+id/event_details_date_iv"
@@ -50,6 +51,15 @@
 
         <TextView
             android:id="@+id/event_details_date_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:paddingEnd="@dimen/normal"
+            android:paddingStart="@dimen/normal"
+            tools:text="15/08/2018 12:00" />
+
+        <TextView
+            android:id="@+id/event_details_end_date_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
@@ -76,9 +86,56 @@
             android:id="@+id/event_details_location_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:paddingEnd="@dimen/small"
-            android:paddingStart="@dimen/small"
+            android:layout_gravity="center_vertical"
+            android:paddingEnd="@dimen/normal"
+            android:paddingStart="@dimen/normal"
             tools:text="Udacity Office" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/event_details_servings_ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/normal">
+
+        <ImageView
+            android:layout_width="@dimen/icon_default_size"
+            android:layout_height="@dimen/icon_default_size"
+            app:srcCompat="@drawable/ic_people_black_24dp" />
+
+        <TextView
+            android:id="@+id/event_details_servings_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:paddingEnd="@dimen/normal"
+            android:paddingStart="@dimen/normal"
+            tools:text="42" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/event_details_budget_ll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="@dimen/normal">
+
+        <ImageView
+            android:layout_width="@dimen/icon_default_size"
+            android:layout_height="@dimen/icon_default_size"
+            app:srcCompat="@drawable/ic_monetization_on_black_24dp" />
+
+        <TextView
+            android:id="@+id/event_details_budget_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:paddingEnd="@dimen/normal"
+            android:paddingStart="@dimen/normal"
+            tools:text="15€" />
 
     </LinearLayout>
 

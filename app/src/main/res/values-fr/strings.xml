@@ -44,6 +44,8 @@
     <string name="dessert">Dessert</string>
     <string name="upcoming">À venir</string>
     <string name="past">Passés</string>
+    <string name="from">de</string>
+    <string name="to">à</string>
 
     <string name="no_contribution_here_yet">Aucune contribution pour le moment</string>
 
