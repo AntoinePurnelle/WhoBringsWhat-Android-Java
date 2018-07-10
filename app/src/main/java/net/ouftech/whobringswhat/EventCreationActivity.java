@@ -18,6 +18,7 @@ package net.ouftech.whobringswhat;
 
 import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
@@ -33,6 +34,7 @@ import com.evernote.android.state.State;
 
 import net.ouftech.whobringswhat.commons.BaseActivity;
 import net.ouftech.whobringswhat.commons.Logger;
+import net.ouftech.whobringswhat.eventcontent.EventContentActivity;
 import net.ouftech.whobringswhat.model.Event;
 import net.ouftech.whobringswhat.model.FirestoreManager;
 
@@ -209,8 +211,7 @@ public class EventCreationActivity extends BaseActivity {
                     public void onSuccess(Void aVoid) {
                         Logger.d(getLogTag(), "Event created");
                         Toast.makeText(EventCreationActivity.this, R.string.event_created, Toast.LENGTH_LONG).show();
-                        // TODO open EventContentActivity
-                        finish();
+                        startEventContentActivity();
                     }
 
                     @Override
@@ -225,7 +226,7 @@ public class EventCreationActivity extends BaseActivity {
                     public void onSuccess(Void aVoid) {
                         Logger.d(getLogTag(), "Event saved");
                         Toast.makeText(EventCreationActivity.this, R.string.event_saved, Toast.LENGTH_LONG).show();
-                        finish();
+                        startEventContentActivity();
                     }
 
                     @Override
@@ -235,6 +236,13 @@ public class EventCreationActivity extends BaseActivity {
                 });
             }
         }
+    }
+
+    private void startEventContentActivity() {
+        Intent intent = new Intent(this, EventContentActivity.class);
+        intent.putExtra(EventContentActivity.EVENT_EXTRA, event);
+        startActivity(intent);
+        finish();
     }
 
     /**
