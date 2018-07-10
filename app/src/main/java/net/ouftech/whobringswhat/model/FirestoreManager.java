@@ -103,7 +103,7 @@ public class FirestoreManager {
                         } else {
                             // If user doesn't exist, create it
                             User user = User.fromFirebaseUser(firebaseUser);
-                            saveUser(user, new AddListener() {
+                            saveUser(user, new SimpleQueryListener() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     currentUser = user;
@@ -138,7 +138,7 @@ public class FirestoreManager {
      * @param user     {@link User} to save as a Firestore document
      * @param listener Query Listener for success and failure callbacks
      */
-    public static void saveUser(@NonNull User user, @NonNull AddListener listener) {
+    public static void saveUser(@NonNull User user, @NonNull SimpleQueryListener listener) {
         db.collection(USERS_COLLECTIONS_NAME).document(user.getFirebaseId())
                 .set(user)
                 .addOnSuccessListener(listener::onSuccess)
@@ -247,7 +247,7 @@ public class FirestoreManager {
      * @param event    {@link Event} to save as a Firestore document
      * @param listener Query Listener for success and failure callbacks
      */
-    public static void addEvent(@NonNull Event event, @NonNull AddListener listener) {
+    public static void addEvent(@NonNull Event event, @NonNull SimpleQueryListener listener) {
         DocumentReference documentReference = db.collection(EVENTS_COLLECTIONS_NAME).document();
         event.setId(documentReference.getId());
         event.setOwner(db.collection(USERS_COLLECTIONS_NAME).document(currentUser.getFirebaseId()));
@@ -269,11 +269,28 @@ public class FirestoreManager {
      * @param event    {@link Event} to save as a Firestore document
      * @param listener Query Listener for success and failure callbacks
      */
-    public static void updateEvent(@NonNull Event event, @NonNull AddListener listener) {
+    public static void updateEvent(@NonNull Event event, @NonNull SimpleQueryListener listener) {
         DocumentReference documentReference = db.collection(EVENTS_COLLECTIONS_NAME).document(event.getId());
 
         documentReference
                 .set(event)
+                .addOnSuccessListener(listener::onSuccess)
+                .addOnFailureListener(listener::onFailure);
+    }
+
+
+    /**
+     * Deletes the  {@link Event} document from Firestore.<br/>
+     * Calling this method will remove anything stored on Firestore for that document.
+     *
+     * @param event    {@link Event} to delete from Firestore
+     * @param listener Query Listener for success and failure callbacks
+     */
+    public static void deleteEvent(@NonNull Event event, @NonNull SimpleQueryListener listener) {
+        DocumentReference documentReference = db.collection(EVENTS_COLLECTIONS_NAME).document(event.getId());
+
+        documentReference
+                .delete()
                 .addOnSuccessListener(listener::onSuccess)
                 .addOnFailureListener(listener::onFailure);
     }
@@ -297,8 +314,8 @@ public class FirestoreManager {
     /**
      * Fetches the {@link Contribution} objects of the "contributions" collection in the given {@link Event}<br/>
      *
-     * @param event
-     * @param listener
+     * @param event Event from chich to fetch the contributions
+     * @param listener Query Listener for success and failure callbacks
      */
     public static void fetchContributionsForEvent(@NonNull Event event, @NonNull ContributionsQueryListener listener) {
         // fetch the /events/[EVENT_ID]/contributions collection
@@ -331,7 +348,7 @@ public class FirestoreManager {
      * @param contribution {@link Contribution} to save as a Firestore document
      * @param listener     Query Listener for success and failure callbacks
      */
-    public static void addContribution(@NonNull Event event, @NonNull Contribution contribution, @NonNull AddListener listener) {
+    public static void addContribution(@NonNull Event event, @NonNull Contribution contribution, @NonNull SimpleQueryListener listener) {
         DocumentReference documentReference = db
                 .collection(EVENTS_COLLECTIONS_NAME).document(event.getId())
                 .collection(CONTRIBUTIONS_COLLECTIONS_NAME).document();
@@ -368,7 +385,7 @@ public class FirestoreManager {
         void onSuccess(@NonNull List<Contribution> contributions);
     }
 
-    public interface AddListener extends QueryListener {
+    public interface SimpleQueryListener extends QueryListener {
         void onSuccess(Void aVoid);
     }
 
@@ -387,7 +404,7 @@ public class FirestoreManager {
 
     public static void testAddUser() {
         User user = new User("User2", "apu+user2@ouftech.net", "2222");
-        saveUser(user, new AddListener() {
+        saveUser(user, new SimpleQueryListener() {
             @Override
             public void onSuccess(Void aVoid) {
                 Logger.d(getLogTag(), "User created with success!");
@@ -417,7 +434,7 @@ public class FirestoreManager {
                 db.collection(USERS_COLLECTIONS_NAME).document("apu+user2@ouftech.net")
         );
 
-        addEvent(event, new AddListener() {
+        addEvent(event, new SimpleQueryListener() {
             @Override
             public void onSuccess(Void aVoid) {
                 Logger.d(getLogTag(), "Event created with success!");
@@ -461,7 +478,7 @@ public class FirestoreManager {
                         true
                 );
 
-                addContribution(event, contribution, new AddListener() {
+                addContribution(event, contribution, new SimpleQueryListener() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Logger.d(getLogTag(), contribution.toString());
@@ -525,6 +542,10 @@ public class FirestoreManager {
 
     // endregion Test methods
 
+
+    public static User getCurrentUser() {
+        return currentUser;
+    }
 
     public static String getLogTag() {
         return "FirestoreManager";

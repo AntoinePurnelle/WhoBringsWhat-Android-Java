@@ -17,20 +17,25 @@
   -->
 
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    tools:context="net.ouftech.whobringswhat.eventslist.EventsListActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_log_in"
+        android:id="@+id/action_edit_event"
+        android:icon="@drawable/ic_edit_white_24dp"
         android:orderInCategory="100"
-        android:title="@string/login"
+        android:title="@string/edit_event"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_leave_event"
+        android:orderInCategory="100"
+        android:title="@string/leave_event"
         app:showAsAction="never" />
 
     <item
-        android:id="@+id/action_log_out"
+        android:id="@+id/action_delete_event"
         android:orderInCategory="100"
-        android:title="@string/logout"
+        android:title="@string/delete_event"
         app:showAsAction="never" />
 
 </menu>

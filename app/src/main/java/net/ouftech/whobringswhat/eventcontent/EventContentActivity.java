@@ -16,16 +16,24 @@
 
 package net.ouftech.whobringswhat.eventcontent;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 
 import com.evernote.android.state.State;
 
+import net.ouftech.whobringswhat.EventEditActivity;
 import net.ouftech.whobringswhat.R;
 import net.ouftech.whobringswhat.commons.BaseActivity;
 import net.ouftech.whobringswhat.commons.Logger;
@@ -43,6 +51,7 @@ import io.github.luizgrp.sectionedrecyclerviewadapter.SectionedRecyclerViewAdapt
 public class EventContentActivity extends BaseActivity {
 
     public static final String EVENT_EXTRA = "EVENT_EXTRA";
+    public static final int EVENT_EDIT_REQUEST_CODE = 1000;
 
     @BindView(R.id.events_content_rv)
     RecyclerView rv;
@@ -181,6 +190,106 @@ public class EventContentActivity extends BaseActivity {
 
         sectionedAdapter.notifyDataSetChanged();
         setProgressBarVisible(false);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_event_content, menu);
+
+        boolean canDelete = event.getOwner() != null
+                && FirestoreManager.getCurrentUser() != null
+                && TextUtils.equals(event.getOwner().getId(), FirestoreManager.getCurrentUser().getFirebaseId());
+        menu.findItem(R.id.action_delete_event).setVisible(canDelete);
+
+
+        return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == EVENT_EDIT_REQUEST_CODE && resultCode == RESULT_OK && data.hasExtra(EVENT_EXTRA)) {
+            event = data.getParcelableExtra(EVENT_EXTRA);
+            displayEventContent();
+
+            if (getSupportActionBar() != null)
+                getSupportActionBar().setTitle(event.getName());
+        }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch (item.getItemId()) {
+            case R.id.action_edit_event:
+                Intent intent = new Intent(this, EventEditActivity.class);
+                intent.putExtra(EventContentActivity.EVENT_EXTRA, event);
+                startActivityForResult(intent, EVENT_EDIT_REQUEST_CODE);
+                break;
+            case R.id.action_leave_event:
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.leave_event)
+                        .setMessage(String.format(getString(R.string.are_you_sure_leave), event.getName()))
+                        .setPositiveButton(R.string.leave_event, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                leaveEvent();
+                                dialog.dismiss();
+                            }
+                        }).setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.dismiss()).show();
+                break;
+            case R.id.action_delete_event:
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.delete_event)
+                        .setMessage(String.format(getString(R.string.are_you_sure_delete), event.getName()))
+                        .setPositiveButton(R.string.delete_event, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                deleteEvent();
+                                dialog.dismiss();
+                            }
+                        }).setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.dismiss()).show();
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void leaveEvent() {
+        setProgressBarVisible(true);
+        event.getUsers().remove(FirestoreManager.getCurrentUser().getFirebaseId());
+        FirestoreManager.updateEvent(event, new FirestoreManager.SimpleQueryListener() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                finish();
+                setProgressBarVisible(false);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Snackbar.make(rv, R.string.an_error_occurred, Snackbar.LENGTH_LONG).show();
+                setProgressBarVisible(false);
+            }
+        });
+    }
+
+    private void deleteEvent() {
+        setProgressBarVisible(true);
+        FirestoreManager.deleteEvent(event, new FirestoreManager.SimpleQueryListener() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                finish();
+                setProgressBarVisible(false);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Snackbar.make(rv, R.string.an_error_occurred, Snackbar.LENGTH_LONG).show();
+                setProgressBarVisible(false);
+            }
+        });
     }
 
     @OnClick(R.id.event_content_fab)

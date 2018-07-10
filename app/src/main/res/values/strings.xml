@@ -36,7 +36,10 @@
     <string name="event_created">Event created</string>
     <string name="event_saved">Event saved</string>
     <string name="new_event">New Event</string>
+    <string name="event_edit">Event Edit</string>
     <string name="edit_event">Edit Event</string>
+    <string name="leave_event">Leave Event</string>
+    <string name="delete_event">Delete Event</string>
 
     <string name="appetizer">Appetizer</string>
     <string name="starter">Starter</string>
@@ -54,6 +57,11 @@
         <item>@string/main</item>
         <item>@string/dessert</item>
     </string-array>
+
+
+    <string name="are_you_sure_delete">Are you sure you want to delete the event \"%s\"?\nEverybody who had access to this event (including you) will loose visibility on it.\nThis action is irreversible!</string>
+
+    <string name="are_you_sure_leave">Are you sure you want to leave the event \"%s\"?\nYou will no longer see this event in your list but you can regain access to it using the sharing link</string>
 
     <string name="please_fill_non_optional">Please fill all the non-optional fields</string>
     <string name="please_enter_valid_servings">Please enter a valid number of servings</string>

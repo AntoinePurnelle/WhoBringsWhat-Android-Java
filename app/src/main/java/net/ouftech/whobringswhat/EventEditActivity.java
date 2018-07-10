@@ -215,7 +215,7 @@ public class EventEditActivity extends BaseActivity {
 
             if (eventCreation) {
                 Logger.d(getLogTag(), String.format("Creating event %s", event));
-                FirestoreManager.addEvent(event, new FirestoreManager.AddListener() {
+                FirestoreManager.addEvent(event, new FirestoreManager.SimpleQueryListener() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Logger.d(getLogTag(), "Event created");
@@ -230,12 +230,14 @@ public class EventEditActivity extends BaseActivity {
                 });
             } else {
                 Logger.d(getLogTag(), String.format("Creating event %s", event));
-                FirestoreManager.updateEvent(event, new FirestoreManager.AddListener() {
+                FirestoreManager.updateEvent(event, new FirestoreManager.SimpleQueryListener() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Logger.d(getLogTag(), "Event saved");
                         Toast.makeText(EventEditActivity.this, R.string.event_saved, Toast.LENGTH_LONG).show();
-                        startEventContentActivity();
+                        getIntent().putExtra(EVENT_EXTRA, event);
+                        setResult(RESULT_OK, getIntent());
+                        finish();
                     }
 
                     @Override
