@@ -264,13 +264,13 @@ public class EventsListActivity extends BaseActivity {
     private void displayEvents(@NonNull List<Event> pastEvents, @NonNull List<Event> upcomingEvents) {
         sectionedAdapter.removeAllSections();
         if (!upcomingEvents.isEmpty())
-            sectionedAdapter.addSection(new EventsSection(upcomingEvents, "Upcoming", position -> {
+            sectionedAdapter.addSection(new EventsSection(upcomingEvents, getString(R.string.upcoming), position -> {
                 Intent intent = new Intent(EventsListActivity.this, EventContentActivity.class);
                 intent.putExtra(EventContentActivity.EVENT_EXTRA, upcomingEvents.get(position));
                 startActivity(intent);
             }));
         if (!pastEvents.isEmpty())
-            sectionedAdapter.addSection(new EventsSection(pastEvents, "Upcoming", position -> {
+            sectionedAdapter.addSection(new EventsSection(pastEvents, getString(R.string.past), position -> {
                 Intent intent = new Intent(EventsListActivity.this, EventContentActivity.class);
                 intent.putExtra(EventContentActivity.EVENT_EXTRA, pastEvents.get(position));
                 startActivity(intent);
