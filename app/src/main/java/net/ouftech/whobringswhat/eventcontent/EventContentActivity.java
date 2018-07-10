@@ -127,7 +127,8 @@ public class EventContentActivity extends BaseActivity {
 
             @Override
             public void onFailure(Exception e) {
-                // TODO
+                setProgressBarVisible(false);
+                Snackbar.make(rv, R.string.an_error_occurred, Snackbar.LENGTH_LONG).show();
             }
         });
     }

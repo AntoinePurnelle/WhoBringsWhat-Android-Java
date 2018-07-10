@@ -319,7 +319,10 @@ public class FirestoreManager {
      */
     public static void fetchContributionsForEvent(@NonNull Event event, @NonNull ContributionsQueryListener listener) {
         // fetch the /events/[EVENT_ID]/contributions collection
-        db.collection(EVENTS_COLLECTIONS_NAME + "/" + event.getId() + "/" + CONTRIBUTIONS_COLLECTIONS_NAME).get()
+        db.collection(EVENTS_COLLECTIONS_NAME + "/" + event.getId() + "/" + CONTRIBUTIONS_COLLECTIONS_NAME)
+                .orderBy("isDrink")
+                .orderBy("name")
+                .get()
                 .addOnCompleteListener(contributionsTask -> {
                     if (contributionsTask.isSuccessful()) {
                         QuerySnapshot contributionsQuerySnapshot = contributionsTask.getResult();
@@ -331,7 +334,7 @@ public class FirestoreManager {
                         }
                         listener.onSuccess(contributionsList);
                     } else {
-                        Logger.w(getLogTag(), "Error getting events documents: ", contributionsTask.getException());
+                        Logger.w(getLogTag(), "Error getting contributions documents: ", contributionsTask.getException());
                         listener.onFailure(contributionsTask.getException());
                     }
 
