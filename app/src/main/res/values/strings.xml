@@ -58,6 +58,7 @@
         <item>@string/dessert</item>
     </string-array>
 
+    <string name="no_contribution_here_yet">No contribution here yet</string>
 
     <string name="are_you_sure_delete">Are you sure you want to delete the event \"%s\"?\nEverybody who had access to this event (including you) will loose visibility on it.\nThis action is irreversible!</string>
 

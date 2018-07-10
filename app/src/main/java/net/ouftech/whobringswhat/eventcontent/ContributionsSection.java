@@ -26,10 +26,10 @@ import net.ouftech.whobringswhat.model.Contribution;
 
 import java.util.List;
 
+import io.github.luizgrp.sectionedrecyclerviewadapter.Section;
 import io.github.luizgrp.sectionedrecyclerviewadapter.SectionParameters;
-import io.github.luizgrp.sectionedrecyclerviewadapter.StatelessSection;
 
-public class ContributionsSection extends StatelessSection {
+public class ContributionsSection extends Section {
 
     private List<Contribution> contributions;
     private String title;
@@ -40,11 +40,15 @@ public class ContributionsSection extends StatelessSection {
                 .itemResourceId(R.layout.contribution_list_item)
                 .headerResourceId(R.layout.contribution_list_header)
                 .footerResourceId(R.layout.contribution_list_footer)
+                .emptyResourceId(R.layout.empty_contributions_view)
                 .build());
 
         this.contributions = contributions;
         this.title = title;
         this.listener = listener;
+
+        if (CollectionUtils.isEmpty(contributions))
+            setState(State.EMPTY);
     }
 
     @Override
@@ -82,6 +86,11 @@ public class ContributionsSection extends StatelessSection {
     @Override
     public void onBindFooterViewHolder(RecyclerView.ViewHolder holder) {
         ((ContributionFooterViewHolder)holder).getFooterTv().setOnClickListener(v -> listener.onAddContributionClicked());
+    }
+
+    @Override
+    public void onBindEmptyViewHolder(RecyclerView.ViewHolder holder) {
+        super.onBindEmptyViewHolder(holder);
     }
 
     public interface ContributionClickListener {
