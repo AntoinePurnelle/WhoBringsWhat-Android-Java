@@ -56,18 +56,18 @@
                 android:layout_height="0dp"
                 android:layout_weight="1" />
 
-            <android.support.v7.widget.AppCompatImageView
-                android:id="@+id/contribution_servings_iv"
-                android:layout_width="@dimen/icon_default_size"
-                android:layout_height="@dimen/icon_default_size"
-                app:srcCompat="@drawable/ic_people_black_24dp" />
-
             <TextView
                 android:id="@+id/contribution_servings_tv"
                 style="@style/TextSecondary"
                 android:paddingEnd="@dimen/small"
                 android:paddingStart="@dimen/small"
                 tools:text="42" />
+
+            <android.support.v7.widget.AppCompatImageView
+                android:id="@+id/contribution_servings_iv"
+                android:layout_width="@dimen/icon_default_size"
+                android:layout_height="@dimen/icon_default_size"
+                app:srcCompat="@drawable/ic_people_black_24dp" />
 
         </LinearLayout>
 

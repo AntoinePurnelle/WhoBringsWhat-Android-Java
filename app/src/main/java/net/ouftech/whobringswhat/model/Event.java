@@ -19,11 +19,13 @@ package net.ouftech.whobringswhat.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.PropertyName;
 
 import java.util.HashMap;
 
@@ -40,10 +42,7 @@ public class Event implements Parcelable {
     @Nullable
     private String location;
     private int servings;
-    private boolean appetizer;
-    private boolean starter;
-    private boolean main;
-    private boolean dessert;
+    private HashMap<String, Boolean> courses;
     @Nullable
     private String type;
     @Nullable
@@ -53,26 +52,14 @@ public class Event implements Parcelable {
     private DocumentReference owner; // User
 
     public Event() {
-        main = true;
+        users = new HashMap<>();
+        courses = new HashMap<>();
     }
 
     public Event(String id, String name, @Nullable String description, long time, long endTime, @Nullable String location, int servings, boolean appetizer, boolean starter, boolean main, boolean dessert, @Nullable String type, @Nullable String budget, CollectionReference contributions, HashMap<String, Long> users, DocumentReference owner) {
+        this(name, description, time, endTime, location, servings, appetizer, starter, main, dessert, type, budget, users, owner);
         this.id = id;
-        this.name = name;
-        this.description = description;
-        this.time = time;
-        this.endTime = endTime;
-        this.location = location;
-        this.servings = servings;
-        this.appetizer = appetizer;
-        this.starter = starter;
-        this.main = main;
-        this.dessert = dessert;
-        this.type = type;
-        this.budget = budget;
         this.contributions = contributions;
-        this.users = users;
-        this.owner = owner;
     }
 
     public Event(String name, @Nullable String description, long time, long endTime, @Nullable String location, int servings, boolean appetizer, boolean starter, boolean main, boolean dessert, @Nullable String type, @Nullable String budget, HashMap<String, Long> users, DocumentReference owner) {
@@ -82,17 +69,18 @@ public class Event implements Parcelable {
         this.endTime = endTime;
         this.location = location;
         this.servings = servings;
-        this.appetizer = appetizer;
-        this.starter = starter;
-        this.main = main;
-        this.dessert = dessert;
         this.type = type;
         this.budget = budget;
         this.users = users;
         this.owner = owner;
+        this.courses = new HashMap<>();
+        this.courses.put(Contribution.CONTRIBUTION_TYPE_APPETIZER, appetizer);
+        this.courses.put(Contribution.CONTRIBUTION_TYPE_STARTER, starter);
+        this.courses.put(Contribution.CONTRIBUTION_TYPE_MAIN, main);
+        this.courses.put(Contribution.CONTRIBUTION_TYPE_DESSERT, dessert);
     }
 
-    public static Event fromDocument(DocumentSnapshot documentSnapshot) {
+    public static Event fromDocument(@NonNull DocumentSnapshot documentSnapshot) {
         Event event = documentSnapshot.toObject(Event.class);
         event.id = documentSnapshot.getId();
         return event;
@@ -158,35 +146,45 @@ public class Event implements Parcelable {
     }
 
     public boolean hasAppetizer() {
-        return appetizer;
+        return courses.get(Contribution.CONTRIBUTION_TYPE_APPETIZER) != null && courses.get(Contribution.CONTRIBUTION_TYPE_APPETIZER) ;
     }
 
     public void setAppetizer(boolean appetizer) {
-        this.appetizer = appetizer;
+        this.courses.put(Contribution.CONTRIBUTION_TYPE_APPETIZER, appetizer);
     }
 
     public boolean hasStarter() {
-        return starter;
+        return courses.get(Contribution.CONTRIBUTION_TYPE_STARTER) != null && courses.get(Contribution.CONTRIBUTION_TYPE_STARTER) ;
     }
 
     public void setStarter(boolean starter) {
-        this.starter = starter;
+        this.courses.put(Contribution.CONTRIBUTION_TYPE_STARTER, starter);
     }
 
     public boolean hasMain() {
-        return main;
+        return courses.get(Contribution.CONTRIBUTION_TYPE_MAIN) != null && courses.get(Contribution.CONTRIBUTION_TYPE_MAIN) ;
     }
 
     public void setMain(boolean main) {
-        this.main = main;
+        this.courses.put(Contribution.CONTRIBUTION_TYPE_MAIN, main);
     }
 
     public boolean hasDessert() {
-        return dessert;
+        return courses.get(Contribution.CONTRIBUTION_TYPE_DESSERT) != null && courses.get(Contribution.CONTRIBUTION_TYPE_DESSERT) ;
     }
 
     public void setDessert(boolean dessert) {
-        this.dessert = dessert;
+        this.courses.put(Contribution.CONTRIBUTION_TYPE_DESSERT, dessert);
+    }
+
+    @PropertyName(value = "courses")
+    public HashMap<String, Boolean> getCourses() {
+        return courses;
+    }
+
+    @PropertyName(value = "courses")
+    public void setCourses(HashMap<String, Boolean> courses) {
+        this.courses = courses;
     }
 
     @Nullable
@@ -240,10 +238,7 @@ public class Event implements Parcelable {
                 ",\n endTime=" + endTime +
                 ",\n location='" + location + '\'' +
                 ",\n servings=" + servings +
-                ",\n appetizer=" + appetizer +
-                ",\n starter=" + starter +
-                ",\n main=" + main +
-                ",\n dessert=" + dessert +
+                ",\n courses=" + courses +
                 ",\n type='" + type + '\'' +
                 ",\n budget=" + budget +
                 ",\n contributions=" + contributions +
@@ -260,10 +255,7 @@ public class Event implements Parcelable {
         endTime = in.readLong();
         location = in.readString();
         servings = in.readInt();
-        appetizer = in.readByte() != 0x00;
-        starter = in.readByte() != 0x00;
-        main = in.readByte() != 0x00;
-        dessert = in.readByte() != 0x00;
+        courses = (HashMap) in.readValue(HashMap.class.getClassLoader());
         type = in.readString();
         budget = in.readString();
         users = (HashMap) in.readValue(HashMap.class.getClassLoader());
@@ -284,10 +276,7 @@ public class Event implements Parcelable {
         dest.writeLong(endTime);
         dest.writeString(location);
         dest.writeInt(servings);
-        dest.writeByte((byte) (appetizer ? 0x01 : 0x00));
-        dest.writeByte((byte) (starter ? 0x01 : 0x00));
-        dest.writeByte((byte) (main ? 0x01 : 0x00));
-        dest.writeByte((byte) (dessert ? 0x01 : 0x00));
+        dest.writeValue(courses);
         dest.writeString(type);
         dest.writeString(budget);
         dest.writeValue(users);

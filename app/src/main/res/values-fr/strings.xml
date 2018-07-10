@@ -33,6 +33,8 @@
     <string name="save_event">Sauver l\'événement</string>
     <string name="event_created">Événement créé</string>
     <string name="event_saved">Événement sauvé</string>
+    <string name="new_event">Nouvel Événement</string>
+    <string name="edit_event">Édition de l\'Événement</string>
     <string name="appetizer">Apéritif</string>
     <string name="starter">Entrée</string>
     <string name="main">Plat principal</string>

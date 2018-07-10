@@ -45,7 +45,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.OnClick;
 
-public class EventCreationActivity extends BaseActivity {
+public class EventEditActivity extends BaseActivity {
 
     public static final String EVENT_EXTRA = "EVENT_EXTRA";
 
@@ -77,6 +77,9 @@ public class EventCreationActivity extends BaseActivity {
     private long endDate = 0;
     @State // Whether it's a new event or the update of an existing one
     private boolean eventCreation = false;
+    @State
+    @StringRes
+    private int titleRes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,10 +93,13 @@ public class EventCreationActivity extends BaseActivity {
                 startDate = event.getTime();
                 endDate = event.getEndTime();
                 saveButton.setText(R.string.save_event);
+                titleRes = R.string.edit_event;
             } else {
                 // No event in Intent --> new event
                 eventCreation = true;
                 saveButton.setText(R.string.create_event);
+                getSupportActionBar().setTitle(R.string.create_event);
+                titleRes = R.string.new_event;
             }
         }
 
@@ -110,6 +116,9 @@ public class EventCreationActivity extends BaseActivity {
         budgetEt.setText(event.getBudget());
         if (event.getServings() > 0)
             servingsEt.setText(String.valueOf(event.getServings()));
+
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setTitle(titleRes);
     }
 
     /**
@@ -153,7 +162,7 @@ public class EventCreationActivity extends BaseActivity {
         new DatePickerDialog(this, (view, year, monthOfYear, dayOfMonth) -> {
             date.set(year, monthOfYear, dayOfMonth);
 
-            new TimePickerDialog(EventCreationActivity.this, (view1, hourOfDay, minute) -> {
+            new TimePickerDialog(EventEditActivity.this, (view1, hourOfDay, minute) -> {
                 date.set(Calendar.HOUR_OF_DAY, hourOfDay);
                 date.set(Calendar.MINUTE, minute);
                 listener.onDateTimePicked(date.getTimeInMillis());
@@ -210,7 +219,7 @@ public class EventCreationActivity extends BaseActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Logger.d(getLogTag(), "Event created");
-                        Toast.makeText(EventCreationActivity.this, R.string.event_created, Toast.LENGTH_LONG).show();
+                        Toast.makeText(EventEditActivity.this, R.string.event_created, Toast.LENGTH_LONG).show();
                         startEventContentActivity();
                     }
 
@@ -225,7 +234,7 @@ public class EventCreationActivity extends BaseActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Logger.d(getLogTag(), "Event saved");
-                        Toast.makeText(EventCreationActivity.this, R.string.event_saved, Toast.LENGTH_LONG).show();
+                        Toast.makeText(EventEditActivity.this, R.string.event_saved, Toast.LENGTH_LONG).show();
                         startEventContentActivity();
                     }
 
@@ -292,7 +301,7 @@ public class EventCreationActivity extends BaseActivity {
     @NonNull
     @Override
     protected String getLogTag() {
-        return "EventCreationActivity";
+        return "EventEditActivity";
     }
 
     @Override
@@ -330,6 +339,15 @@ public class EventCreationActivity extends BaseActivity {
 
     public void setEventCreation(boolean eventCreation) {
         this.eventCreation = eventCreation;
+    }
+
+    @StringRes
+    public int getTitleRes() {
+        return titleRes;
+    }
+
+    public void setTitleRes(@StringRes int titleRes) {
+        this.titleRes = titleRes;
     }
 
     private interface DateTimePickerListener {

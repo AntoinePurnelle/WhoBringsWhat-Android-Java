@@ -78,6 +78,9 @@ public class EventContentActivity extends BaseActivity {
             displayEventContent();
 
         loadContributions();
+
+        if (getSupportActionBar() != null)
+            getSupportActionBar().setTitle(event.getName());
     }
 
     private void loadContributions() {

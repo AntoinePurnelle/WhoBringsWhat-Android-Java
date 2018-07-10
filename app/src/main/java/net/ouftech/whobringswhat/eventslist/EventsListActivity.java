@@ -36,7 +36,7 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import net.ouftech.whobringswhat.EventCreationActivity;
+import net.ouftech.whobringswhat.EventEditActivity;
 import net.ouftech.whobringswhat.R;
 import net.ouftech.whobringswhat.commons.BaseActivity;
 import net.ouftech.whobringswhat.commons.Logger;
@@ -79,6 +79,15 @@ public class EventsListActivity extends BaseActivity {
 
         init();
 
+        sectionedAdapter = new SectionedRecyclerViewAdapter();
+        eventsListRv.setLayoutManager(new LinearLayoutManager(this));
+        eventsListRv.setAdapter(sectionedAdapter);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
         FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         if (firebaseUser != null)
             // If user is logged in (can be anonymously)
@@ -86,10 +95,6 @@ public class EventsListActivity extends BaseActivity {
         else
             // If no user is logged in
             displayLoginDialog();
-
-        sectionedAdapter = new SectionedRecyclerViewAdapter();
-        eventsListRv.setLayoutManager(new LinearLayoutManager(this));
-        eventsListRv.setAdapter(sectionedAdapter);
     }
 
     private void init() {
@@ -342,7 +347,7 @@ public class EventsListActivity extends BaseActivity {
 
     @OnClick(R.id.fab)
     public void onFabClicked() {
-        Intent intent = new Intent(this, EventCreationActivity.class);
+        Intent intent = new Intent(this, EventEditActivity.class);
         startActivity(intent);
     }
 

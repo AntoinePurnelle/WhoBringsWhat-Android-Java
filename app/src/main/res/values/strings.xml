@@ -35,6 +35,8 @@
     <string name="save_event">Save event</string>
     <string name="event_created">Event created</string>
     <string name="event_saved">Event saved</string>
+    <string name="new_event">New Event</string>
+    <string name="edit_event">Edit Event</string>
 
     <string name="appetizer">Appetizer</string>
     <string name="starter">Starter</string>

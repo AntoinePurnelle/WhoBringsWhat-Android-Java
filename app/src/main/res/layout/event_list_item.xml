@@ -55,17 +55,17 @@
                 android:gravity="center|start"
                 tools:text="15/08/2018" />
 
-            <ImageView
-                android:layout_width="@dimen/icon_default_size"
-                android:layout_height="@dimen/icon_default_size"
-                app:srcCompat="@drawable/ic_people_black_24dp" />
-
             <TextView
                 android:id="@+id/event_item_servings_tv"
                 style="@style/TextSecondary"
                 android:paddingEnd="@dimen/small"
                 android:paddingStart="@dimen/small"
                 tools:text="42" />
+
+            <ImageView
+                android:layout_width="@dimen/icon_default_size"
+                android:layout_height="@dimen/icon_default_size"
+                app:srcCompat="@drawable/ic_people_black_24dp" />
 
         </LinearLayout>
 

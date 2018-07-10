@@ -24,6 +24,7 @@ import android.support.annotation.Nullable;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.PropertyName;
 
 import net.ouftech.whobringswhat.R;
 
@@ -66,8 +67,6 @@ public class Contribution implements Parcelable {
         Contribution contribution = documentSnapshot.toObject(Contribution.class);
         if (contribution != null) {
             contribution.id = documentSnapshot.getId();
-            Boolean isDrink = (Boolean) documentSnapshot.getData().get("isDrink");
-            contribution.isDrink = isDrink != null && isDrink;
         }
         return contribution;
     }
@@ -147,16 +146,14 @@ public class Contribution implements Parcelable {
         this.contributor = contributor;
     }
 
+    @PropertyName(value = "isDrink")
     public boolean isDrink() {
         return isDrink;
     }
 
+    @PropertyName(value = "isDrink")
     public void setIsDrink(boolean isDrink) {
-        isDrink = isDrink;
-    }
-
-    public void setIsDrink(Boolean isDrink) {
-        isDrink = isDrink;
+        this.isDrink = isDrink;
     }
 
     @NonNull
