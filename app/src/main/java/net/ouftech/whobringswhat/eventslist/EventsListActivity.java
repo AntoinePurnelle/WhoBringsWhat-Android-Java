@@ -17,13 +17,17 @@
 package net.ouftech.whobringswhat.eventslist;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.StringRes;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -31,10 +35,12 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.crashlytics.android.Crashlytics;
+import com.evernote.android.state.State;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 
 import net.ouftech.whobringswhat.EventEditActivity;
 import net.ouftech.whobringswhat.R;
@@ -72,6 +78,9 @@ public class EventsListActivity extends BaseActivity {
 
     private SectionedRecyclerViewAdapter sectionedAdapter;
 
+    @State
+    private String pendingEvent;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,6 +109,55 @@ public class EventsListActivity extends BaseActivity {
     private void init() {
         Fabric.with(this);
         FirestoreManager.init();
+
+        FirebaseDynamicLinks.getInstance()
+                .getDynamicLink(getIntent())
+                .addOnSuccessListener(this, pendingDynamicLinkData -> {
+                    // Get deep link from result (may be null if no link is found)
+                    Uri deepLink;
+                    if (pendingDynamicLinkData != null) {
+                        deepLink = pendingDynamicLinkData.getLink();
+                        logd("opening with link " + deepLink);
+
+                        String[] parts = deepLink.getPath().split("/");
+                        String path, id;
+                        if (TextUtils.isEmpty(parts[0])) {
+                            path = parts[1];
+                            id = parts[2];
+                        } else {
+                            path = parts[0];
+                            id = parts[1];
+                        }
+
+                        if ("events".equals(path)) {
+                            if (FirebaseAuth.getInstance().getCurrentUser() == null)  // Not logged in or anonymous. Wait for login
+                                pendingEvent = id;
+                            else
+                                openPendingEvent(id);
+                        }
+                    }
+                })
+                .addOnFailureListener(this, e -> {
+                    logw("getDynamicLink:onFailure", e);
+                    showWarning(R.string.an_error_occurred);
+                });
+    }
+
+    private void openPendingEvent(String id) {
+        setProgressBarVisible(true);
+        FirestoreManager.fetchEventById(id, new FirestoreManager.EventQueryListener() {
+            @Override
+            public void onSuccess(@NonNull Event event) {
+                setProgressBarVisible(false);
+                    openEvent(event);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                showWarning(R.string.an_error_occurred);
+                setProgressBarVisible(false);
+            }
+        });
     }
 
     /**
@@ -226,6 +284,13 @@ public class EventsListActivity extends BaseActivity {
      */
     private void onLoggedIn(@NonNull FirebaseUser firebaseUser) {
         setProgressBarVisible(true);
+
+        if (pendingEvent != null) {
+            // app was opened by a dynamic link --> open the pending event
+            openPendingEvent(pendingEvent);
+            pendingEvent = null; // reset to prevent re-open when coming back to activity
+        }
+
         updateLoginMenu();
         Crashlytics.setUserIdentifier(firebaseUser.getUid());
 
@@ -269,17 +334,9 @@ public class EventsListActivity extends BaseActivity {
     private void displayEvents(@NonNull List<Event> pastEvents, @NonNull List<Event> upcomingEvents) {
         sectionedAdapter.removeAllSections();
         if (!upcomingEvents.isEmpty())
-            sectionedAdapter.addSection(new EventsSection(upcomingEvents, getString(R.string.upcoming), position -> {
-                Intent intent = new Intent(EventsListActivity.this, EventContentActivity.class);
-                intent.putExtra(EventContentActivity.EVENT_EXTRA, upcomingEvents.get(position));
-                startActivity(intent);
-            }));
+            sectionedAdapter.addSection(new EventsSection(upcomingEvents, getString(R.string.upcoming), position -> openEvent(upcomingEvents.get(position))));
         if (!pastEvents.isEmpty())
-            sectionedAdapter.addSection(new EventsSection(pastEvents, getString(R.string.past), position -> {
-                Intent intent = new Intent(EventsListActivity.this, EventContentActivity.class);
-                intent.putExtra(EventContentActivity.EVENT_EXTRA, pastEvents.get(position));
-                startActivity(intent);
-            }));
+            sectionedAdapter.addSection(new EventsSection(pastEvents, getString(R.string.past), position -> openEvent(pastEvents.get(position))));
 
         runOnUiThread(() -> {
 
@@ -296,6 +353,12 @@ public class EventsListActivity extends BaseActivity {
 
         sectionedAdapter.notifyDataSetChanged();
         setProgressBarVisible(false);
+    }
+
+    private void openEvent(@NonNull Event event) {
+        Intent intent = new Intent(EventsListActivity.this, EventContentActivity.class);
+        intent.putExtra(EventContentActivity.EVENT_EXTRA, event);
+        startActivity(intent);
     }
 
     @Override
@@ -349,6 +412,18 @@ public class EventsListActivity extends BaseActivity {
     public void onFabClicked() {
         Intent intent = new Intent(this, EventEditActivity.class);
         startActivity(intent);
+    }
+
+    private void showWarning(@StringRes int message) {
+        Snackbar.make(eventsListRv, message, Snackbar.LENGTH_LONG).show();
+    }
+
+    public String getPendingEvent() {
+        return pendingEvent;
+    }
+
+    public void setPendingEvent(String pendingEvent) {
+        this.pendingEvent = pendingEvent;
     }
 
     @NonNull

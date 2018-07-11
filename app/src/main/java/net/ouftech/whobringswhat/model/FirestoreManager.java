@@ -1,9 +1,14 @@
 package net.ouftech.whobringswhat.model;
 
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.dynamiclinks.DynamicLink;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.ShortDynamicLink;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -297,6 +302,17 @@ public class FirestoreManager {
                 .delete()
                 .addOnSuccessListener(listener::onSuccess)
                 .addOnFailureListener(listener::onFailure);
+    }
+
+    public static void getEventLink(@NonNull Event event, @NonNull OnCompleteListener<ShortDynamicLink> listener) {
+        FirebaseDynamicLinks.getInstance().createDynamicLink()
+                .setLink(Uri.parse("https://www.ouftech.net/events/" + event.getId()))
+                .setDynamicLinkDomain("whobringswhat.page.link")
+                // Open links with this app on Android
+                .setAndroidParameters(new DynamicLink.AndroidParameters.Builder("net.ouftech.whobringswhat").build())
+                // Open links with com.example.ios on iOS
+                .setIosParameters(new DynamicLink.IosParameters.Builder("net.ouftech.whobringswhat").build())
+                .buildShortDynamicLink().addOnCompleteListener(listener);
     }
 
     // endregion Events
