@@ -20,6 +20,12 @@ apply plugin: 'com.google.firebase.firebase-perf'
 
 android {
     signingConfigs {
+        release {
+            storeFile file("../../wbw.jks")
+            storePassword "whobringswhat"
+            keyAlias "whobringswhat"
+            keyPassword "whobringswhat"
+        }
     }
     compileSdkVersion 28
     defaultConfig {
@@ -37,6 +43,7 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
         }
         debug {
             applicationIdSuffix '.debug'
