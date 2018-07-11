@@ -149,7 +149,19 @@ public class EventsListActivity extends BaseActivity {
             @Override
             public void onSuccess(@NonNull Event event) {
                 setProgressBarVisible(false);
-                    openEvent(event);
+                event.addUser(FirebaseAuth.getInstance().getCurrentUser().getUid());
+                FirestoreManager.updateEvent(event, new FirestoreManager.SimpleQueryListener() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        logd("User added to event");
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        logw("Could not add user to event", e);
+                    }
+                });
+                openEvent(event);
             }
 
             @Override

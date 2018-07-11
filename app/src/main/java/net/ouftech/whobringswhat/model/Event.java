@@ -86,6 +86,11 @@ public class Event implements Parcelable {
         return event;
     }
 
+    public void addUser(String userId) {
+        if (!users.containsKey(userId))
+            users.put(userId, time);
+    }
+
     public String getId() {
         return id;
     }
