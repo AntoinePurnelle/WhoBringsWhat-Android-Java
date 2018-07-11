@@ -16,7 +16,6 @@
 
 package net.ouftech.whobringswhat.eventcontent;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -250,24 +249,18 @@ public class EventContentActivity extends BaseActivity {
                 new AlertDialog.Builder(this)
                         .setTitle(R.string.leave_event)
                         .setMessage(String.format(getString(R.string.are_you_sure_leave), event.getName()))
-                        .setPositiveButton(R.string.leave_event, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                leaveEvent();
-                                dialog.dismiss();
-                            }
+                        .setPositiveButton(R.string.leave_event, (dialog, which) -> {
+                            leaveEvent();
+                            dialog.dismiss();
                         }).setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.dismiss()).show();
                 break;
             case R.id.action_delete_event:
                 new AlertDialog.Builder(this)
                         .setTitle(R.string.delete_event)
-                        .setMessage(String.format(getString(R.string.are_you_sure_delete), event.getName()))
-                        .setPositiveButton(R.string.delete_event, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                deleteEvent();
-                                dialog.dismiss();
-                            }
+                        .setMessage(String.format(getString(R.string.are_you_sure_delete_event), event.getName()))
+                        .setPositiveButton(R.string.delete_event, (dialog, which) -> {
+                            deleteEvent();
+                            dialog.dismiss();
                         }).setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.dismiss()).show();
                 break;
         }

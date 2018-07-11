@@ -58,6 +58,7 @@
     <string name="edit_event">Edit Event</string>
     <string name="leave_event">Leave Event</string>
     <string name="delete_event">Delete Event</string>
+    <string name="delete_contribution">Delete Contribution</string>
 
     <string name="appetizer">Appetizer</string>
     <string name="starter">Starter</string>
@@ -78,7 +79,8 @@
 
     <string name="no_contribution_here_yet">No contribution here yet</string>
 
-    <string name="are_you_sure_delete">Are you sure you want to delete the event \"%s\"?\nEverybody who had access to this event (including you) will loose visibility on it.\nThis action is irreversible!</string>
+    <string name="are_you_sure_delete_event">Are you sure you want to delete the event \"%s\"?\nEverybody who had access to this event (including you) will loose visibility on it.\nThis action is irreversible!</string>
+    <string name="are_you_sure_delete_contribution">Are you sure you want to delete this contribution?\nEverybody who had access to this event (including you) will loose visibility on it.\nThis action is irreversible!</string>
 
     <string name="are_you_sure_leave">Are you sure you want to leave the event \"%s\"?\nYou will no longer see this event in your list but you can regain access to it using the sharing link</string>
 

@@ -15,129 +15,141 @@
   ~ See the License for the specific language governing permissions and
   ~ limitations under the License.
   -->
-
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+    android:layout_height="match_parent">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/card_horizontal_margin"
-        android:layout_marginStart="@dimen/card_horizontal_margin"
-        android:orientation="vertical"
-        android:padding="@dimen/large">
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <android.support.design.widget.TextInputLayout style="@style/TIL">
-
-            <EditText
-                android:id="@+id/contribution_edit_name_et"
-                style="@style/ET"
-                android:hint="@string/name"
-                tools:text="Homemade Pizza" />
-        </android.support.design.widget.TextInputLayout>
-
-        <CheckBox
-            android:id="@+id/contribution_edit_drink_cb"
-            style="@style/ET"
-            android:text="Drink" />
-
-        <android.support.design.widget.TextInputLayout style="@style/TIL">
-
-            <EditText
-                android:id="@+id/contribution_edit_contributor_et"
-                style="@style/ET"
-                android:hint="@string/contributor"
-                tools:text="Smith family" />
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout style="@style/TIL">
-
-            <EditText
-                android:id="@+id/contribution_edit_servings_et"
-                style="@style/ET"
-                android:ems="10"
-                android:hint="@string/servings_optional"
-                android:inputType="number"
-                tools:text="100" />
-        </android.support.design.widget.TextInputLayout>
-
-
-        <LinearLayout
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
+            android:layout_marginEnd="@dimen/card_horizontal_margin"
+            android:layout_marginStart="@dimen/card_horizontal_margin"
+            android:orientation="vertical"
+            android:padding="@dimen/large">
 
-            <android.support.design.widget.TextInputLayout
-                style="@style/TIL"
-                android:layout_width="0dp"
-                android:layout_weight="1">
+            <android.support.design.widget.TextInputLayout style="@style/TIL">
 
                 <EditText
-                    android:id="@+id/contribution_edit_quantity_et"
+                    android:id="@+id/contribution_edit_name_et"
+                    style="@style/ET"
+                    android:hint="@string/name"
+                    tools:text="Homemade Pizza" />
+            </android.support.design.widget.TextInputLayout>
+
+            <CheckBox
+                android:id="@+id/contribution_edit_drink_cb"
+                style="@style/ET"
+                android:text="Drink" />
+
+            <android.support.design.widget.TextInputLayout style="@style/TIL">
+
+                <EditText
+                    android:id="@+id/contribution_edit_contributor_et"
+                    style="@style/ET"
+                    android:hint="@string/contributor"
+                    tools:text="Smith family" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout style="@style/TIL">
+
+                <EditText
+                    android:id="@+id/contribution_edit_servings_et"
                     style="@style/ET"
                     android:ems="10"
-                    android:hint="@string/quantity_optional"
-                    android:inputType="number" />
+                    android:hint="@string/servings_optional"
+                    android:inputType="number"
+                    tools:text="100" />
             </android.support.design.widget.TextInputLayout>
 
-            <android.support.design.widget.TextInputLayout
-                style="@style/TIL"
-                android:layout_width="0dp"
-                android:layout_weight="1">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <android.support.design.widget.TextInputLayout
+                    style="@style/TIL"
+                    android:layout_width="0dp"
+                    android:layout_weight="1">
+
+                    <EditText
+                        android:id="@+id/contribution_edit_quantity_et"
+                        style="@style/ET"
+                        android:ems="10"
+                        android:hint="@string/quantity_optional"
+                        android:inputType="number" />
+                </android.support.design.widget.TextInputLayout>
+
+                <android.support.design.widget.TextInputLayout
+                    style="@style/TIL"
+                    android:layout_width="0dp"
+                    android:layout_weight="1">
+
+                    <EditText
+                        android:id="@+id/contribution_edit_unit_et"
+                        style="@style/ET"
+                        android:hint="@string/unit_optional" />
+                </android.support.design.widget.TextInputLayout>
+
+            </LinearLayout>
+
+            <android.support.design.widget.TextInputLayout style="@style/TIL">
 
                 <EditText
-                    android:id="@+id/contribution_edit_unit_et"
+                    android:id="@+id/contribution_edit_course_et"
                     style="@style/ET"
-                    android:hint="@string/unit_optional" />
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:hint="@string/course"
+                    android:inputType="none"
+                    tools:text="Main" />
             </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout style="@style/TIL">
+
+                <EditText
+                    android:id="@+id/contribution_edit_comment_et"
+                    style="@style/ET"
+                    android:hint="@string/comment_optional" />
+            </android.support.design.widget.TextInputLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/event_edit_save_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginTop="@dimen/normal"
+                android:background="@drawable/rounded_corner_button"
+                android:elevation="@dimen/default_elevation"
+                android:padding="@dimen/normal"
+                android:text="@string/create_contribution"
+                android:textAllCaps="true"
+                android:textColor="@color/white"
+                android:textSize="@dimen/text_size_title"
+                tools:ignore="UnusedAttribute" />
 
         </LinearLayout>
 
-        <android.support.design.widget.TextInputLayout style="@style/TIL">
+    </ScrollView>
 
-            <EditText
-                android:id="@+id/contribution_edit_course_et"
-                style="@style/ET"
-                android:focusable="false"
-                android:focusableInTouchMode="false"
-                android:hint="@string/course"
-                android:inputType="none"
-                tools:text="Main" />
-        </android.support.design.widget.TextInputLayout>
+    <ProgressBar
+        android:id="@+id/pb_loading_indicator"
+        android:layout_width="@dimen/loading_indicator_size"
+        android:layout_height="@dimen/loading_indicator_size"
+        android:layout_gravity="center"
+        android:visibility="gone" />
 
-        <android.support.design.widget.TextInputLayout style="@style/TIL">
-
-            <EditText
-                android:id="@+id/contribution_edit_comment_et"
-                style="@style/ET"
-                android:hint="@string/comment_optional" />
-        </android.support.design.widget.TextInputLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
-        <TextView
-            android:id="@+id/event_edit_save_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="end"
-            android:layout_marginTop="@dimen/normal"
-            android:background="@drawable/rounded_corner_button"
-            android:elevation="@dimen/default_elevation"
-            android:padding="@dimen/normal"
-            android:text="@string/create_contribution"
-            android:textAllCaps="true"
-            android:textColor="@color/white"
-            android:textSize="@dimen/text_size_title"
-            tools:ignore="UnusedAttribute" />
-
-    </LinearLayout>
-
-</ScrollView>
+</FrameLayout>

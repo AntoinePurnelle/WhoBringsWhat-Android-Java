@@ -54,6 +54,7 @@
     <string name="edit_event">Modifier l\'événement</string>
     <string name="leave_event">Quitter l\'événement</string>
     <string name="delete_event">Supperimer l\'événement</string>
+    <string name="delete_contribution">Supprimer la Contribution</string>
     <string name="appetizer">Apéritif</string>
     <string name="starter">Entrée</string>
     <string name="main">Plat principal</string>
@@ -65,7 +66,7 @@
 
     <string name="no_contribution_here_yet">Aucune contribution pour le moment</string>
 
-    <string name="are_you_sure_delete">Êtes-vous sûr de vouloir supprimer l\'événement \"%s\" ?\nTous ceux qui y avaient accès perdront la visibilité sur celui-ci.\nCette action est irréversible!</string>
+    <string name="are_you_sure_delete_event">Êtes-vous sûr de vouloir supprimer l\'événement \"%s\" ?\nTous ceux qui y avaient accès perdront la visibilité sur celui-ci.\nCette action est irréversible!</string>
     <string name="are_you_sure_leave">Êtes-vous sûr de vouloir quitter l\'événement \"%s\" ?\nVous ne verrez plus cet événement dnas votre liste mais vous pouvez le retrouver via son lien de partage</string>
 
     <string name="add_contribution">Ajouter une contribution</string>

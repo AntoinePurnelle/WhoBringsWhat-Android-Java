@@ -320,7 +320,7 @@ public class FirestoreManager {
     /**
      * Fetches the {@link Contribution} objects of the "contributions" collection in the given {@link Event}<br/>
      *
-     * @param event Event from chich to fetch the contributions
+     * @param event    Event from chich to fetch the contributions
      * @param listener Query Listener for success and failure callbacks
      */
     public static void fetchContributionsForEvent(@NonNull Event event, @NonNull ContributionsQueryListener listener) {
@@ -386,6 +386,26 @@ public class FirestoreManager {
 
         documentReference
                 .set(contribution)
+                .addOnSuccessListener(listener::onSuccess)
+                .addOnFailureListener(listener::onFailure);
+    }
+
+
+    /**
+     * Deletes the {@link Contribution} document from Firestore.<br/>
+     * Calling this method will remove anything stored on Firestore for that document.
+     *
+     * @param event        {@link Event} in which to delete the Contribution
+     * @param contribution {@link Contribution} to delete from Firestore
+     * @param listener     Query Listener for success and failure callbacks
+     */
+    public static void deleteContribution(@NonNull Event event, @NonNull Contribution contribution, @NonNull SimpleQueryListener listener) {
+        DocumentReference documentReference = db
+                .collection(EVENTS_COLLECTIONS_NAME).document(event.getId())
+                .collection(CONTRIBUTIONS_COLLECTIONS_NAME).document(contribution.getId());
+
+        documentReference
+                .delete()
                 .addOnSuccessListener(listener::onSuccess)
                 .addOnFailureListener(listener::onFailure);
     }

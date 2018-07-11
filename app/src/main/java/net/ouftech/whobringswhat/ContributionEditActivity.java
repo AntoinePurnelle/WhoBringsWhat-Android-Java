@@ -22,8 +22,12 @@ import android.support.annotation.StringRes;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
 import android.widget.CheckBox;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -70,6 +74,8 @@ public class ContributionEditActivity extends BaseActivity {
     TextView saveButton;
     @BindView(R.id.contribution_edit_drink_cb)
     CheckBox drinkCb;
+    @BindView(R.id.pb_loading_indicator)
+    ProgressBar progressBar;
 
     @State
     private Contribution contribution;
@@ -175,20 +181,21 @@ public class ContributionEditActivity extends BaseActivity {
     }
 
     private void saveContribution() {
+        setProgressBarVisible(true);
         if (contributionCreation) {
             Logger.d(getLogTag(), String.format("Creating contribution %s", contribution));
             FirestoreManager.addContribution(event, contribution, new FirestoreManager.SimpleQueryListener() {
                 @Override
                 public void onSuccess(Void aVoid) {
                     Logger.d(getLogTag(), "Contribution created");
+                    setProgressBarVisible(false);
                     Toast.makeText(ContributionEditActivity.this, R.string.contribution_created, Toast.LENGTH_LONG).show();
-                    getIntent().putExtra(CONTRIBUTION_EXTRA, contribution);
-                    setResult(RESULT_OK, getIntent());
-                    finish();
+                    finishWithSuccess();
                 }
 
                 @Override
                 public void onFailure(Exception e) {
+                    setProgressBarVisible(false);
                     showWarning(R.string.an_error_occurred);
                 }
             });
@@ -198,18 +205,24 @@ public class ContributionEditActivity extends BaseActivity {
                 @Override
                 public void onSuccess(Void aVoid) {
                     Logger.d(getLogTag(), "Contribution saved");
+                    setProgressBarVisible(false);
                     Toast.makeText(ContributionEditActivity.this, R.string.contribution_saved, Toast.LENGTH_LONG).show();
-                    getIntent().putExtra(CONTRIBUTION_EXTRA, contribution);
-                    setResult(RESULT_OK, getIntent());
-                    finish();
+                    finishWithSuccess();
                 }
 
                 @Override
                 public void onFailure(Exception e) {
+                    setProgressBarVisible(false);
                     showWarning(R.string.an_error_occurred);
                 }
             });
         }
+    }
+
+    private void finishWithSuccess() {
+        getIntent().putExtra(CONTRIBUTION_EXTRA, contribution);
+        setResult(RESULT_OK, getIntent());
+        finish();
     }
 
     private boolean checkValidity() {
@@ -251,6 +264,50 @@ public class ContributionEditActivity extends BaseActivity {
      */
     private void showWarning(@StringRes int message) {
         Snackbar.make(saveButton, message, Snackbar.LENGTH_LONG).show();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_contribution_edit, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_delete_contribution) {
+            new AlertDialog.Builder(this)
+                    .setTitle(R.string.delete_contribution)
+                    .setMessage(getString(R.string.are_you_sure_delete_contribution))
+                    .setPositiveButton(R.string.delete_contribution, (dialog, which) -> {
+                        deleteContribution();
+                        dialog.dismiss();
+                    }).setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.dismiss()).show();
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void deleteContribution() {
+        setProgressBarVisible(true);
+        FirestoreManager.deleteContribution(event, contribution, new FirestoreManager.SimpleQueryListener() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                setProgressBarVisible(false);
+                finishWithSuccess();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Snackbar.make(nameEt, R.string.an_error_occurred, Snackbar.LENGTH_LONG).show();
+                setProgressBarVisible(false);
+            }
+        });
+    }
+
+    private void setProgressBarVisible(final boolean visible) {
+        if (isRunning() && progressBar != null)
+            runOnUiThread(() -> progressBar.setVisibility(visible ? View.VISIBLE : View.GONE));
     }
 
     public Contribution getContribution() {
