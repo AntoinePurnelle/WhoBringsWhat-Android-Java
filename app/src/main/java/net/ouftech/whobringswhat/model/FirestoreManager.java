@@ -91,7 +91,7 @@ public class FirestoreManager {
      *
      * @param firebaseUser {@link FirebaseUser} object retrieved from authentication used to create or fetch the {@link User} document
      */
-    public static void initWithFirebaseUser(@NonNull FirebaseUser firebaseUser, UserQueryListener userQueryListener) {
+    public static void initWithFirebaseUser(@NonNull FirebaseUser firebaseUser, UserQueryListener userQueryListener, boolean update) {
         Logger.d(getLogTag(), String.format("Initializing with FirebaseUser %s", firebaseUser.getUid()));
 
         // Try to fetch the user
@@ -102,7 +102,7 @@ public class FirestoreManager {
                     if (userTask.isSuccessful()) {
                         DocumentSnapshot userDocumentSnapshot = userTask.getResult();
 
-                        if (userDocumentSnapshot.exists()) {
+                        if (!update && userDocumentSnapshot.exists()) {
                             // If user from Firebase exists, save it
                             currentUser = User.fromDocument(userDocumentSnapshot);
                             Logger.d(getLogTag(), String.format("User fetched: %s", currentUser));

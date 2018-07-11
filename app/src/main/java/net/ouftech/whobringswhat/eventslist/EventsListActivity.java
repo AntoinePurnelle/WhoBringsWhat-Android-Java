@@ -80,6 +80,7 @@ public class EventsListActivity extends BaseActivity {
 
     @State
     private String pendingEvent;
+    private boolean transformAnonymous;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,6 +182,10 @@ public class EventsListActivity extends BaseActivity {
                 new AuthUI.IdpConfig.GoogleBuilder().build(),
                 new AuthUI.IdpConfig.TwitterBuilder().build());
 
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null && user.isAnonymous())
+            transformAnonymous = true;
+
         startActivityForResult(
                 AuthUI.getInstance()
                         .createSignInIntentBuilder()
@@ -221,6 +226,7 @@ public class EventsListActivity extends BaseActivity {
             if (resultCode == RESULT_OK) { // User has logged in
                 FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
                 if (firebaseUser == null) {
+                    transformAnonymous = false;
                     Logger.e(getLogTag(), new NullPointerException("Firebase user is null but result is OK"));
                     displayLoginError();
                 } else {
@@ -228,6 +234,7 @@ public class EventsListActivity extends BaseActivity {
                     onLoggedIn(firebaseUser);
                 }
             } else {
+                transformAnonymous = false;
                 if (response != null && response.getError() != null) {
                     Logger.e(getLogTag(), "Error during login with Firebase", response.getError());
                     displayLoginError();
@@ -316,7 +323,8 @@ public class EventsListActivity extends BaseActivity {
             public void onFailure(Exception e) {
                 Logger.e(getLogTag(), String.format("Error while fetching or creating user %s", firebaseUser.getUid()), e);
             }
-        });
+        }, transformAnonymous);
+        transformAnonymous = false;
 
 
         FirestoreManager.fetchEventsForUser(firebaseUser.getUid(), new FirestoreManager.EventsQueryListener() {
