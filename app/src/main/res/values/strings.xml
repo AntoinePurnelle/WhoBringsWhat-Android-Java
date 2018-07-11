@@ -51,6 +51,8 @@
     <string name="save_event">Save event</string>
     <string name="event_created">Event created</string>
     <string name="event_saved">Event saved</string>
+    <string name="contribution_created">Contribution created</string>
+    <string name="contribution_saved">Contribution saved</string>
     <string name="new_event">New Event</string>
     <string name="event_edit">Event Edit</string>
     <string name="edit_event">Edit Event</string>

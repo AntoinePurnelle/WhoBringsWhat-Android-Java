@@ -212,39 +212,43 @@ public class EventEditActivity extends BaseActivity {
             if (!TextUtils.isEmpty(servingsEt.getText().toString()))
                 event.setServings(Integer.parseInt(servingsEt.getText().toString()));
 
-            if (eventCreation) {
-                Logger.d(getLogTag(), String.format("Creating event %s", event));
-                FirestoreManager.addEvent(event, new FirestoreManager.SimpleQueryListener() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Logger.d(getLogTag(), "Event created");
-                        Toast.makeText(EventEditActivity.this, R.string.event_created, Toast.LENGTH_LONG).show();
-                        startEventContentActivity();
-                    }
+            saveEvent();
+        }
+    }
 
-                    @Override
-                    public void onFailure(Exception e) {
-                        showWarning(R.string.an_error_occurred);
-                    }
-                });
-            } else {
-                Logger.d(getLogTag(), String.format("Creating event %s", event));
-                FirestoreManager.updateEvent(event, new FirestoreManager.SimpleQueryListener() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Logger.d(getLogTag(), "Event saved");
-                        Toast.makeText(EventEditActivity.this, R.string.event_saved, Toast.LENGTH_LONG).show();
-                        getIntent().putExtra(EVENT_EXTRA, event);
-                        setResult(RESULT_OK, getIntent());
-                        finish();
-                    }
+    private void saveEvent() {
+        if (eventCreation) {
+            Logger.d(getLogTag(), String.format("Creating event %s", event));
+            FirestoreManager.addEvent(event, new FirestoreManager.SimpleQueryListener() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Logger.d(getLogTag(), "Event created");
+                    Toast.makeText(EventEditActivity.this, R.string.event_created, Toast.LENGTH_LONG).show();
+                    startEventContentActivity();
+                }
 
-                    @Override
-                    public void onFailure(Exception e) {
-                        showWarning(R.string.an_error_occurred);
-                    }
-                });
-            }
+                @Override
+                public void onFailure(Exception e) {
+                    showWarning(R.string.an_error_occurred);
+                }
+            });
+        } else {
+            Logger.d(getLogTag(), String.format("Updating event %s", event));
+            FirestoreManager.updateEvent(event, new FirestoreManager.SimpleQueryListener() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Logger.d(getLogTag(), "Event saved");
+                    Toast.makeText(EventEditActivity.this, R.string.event_saved, Toast.LENGTH_LONG).show();
+                    getIntent().putExtra(EVENT_EXTRA, event);
+                    setResult(RESULT_OK, getIntent());
+                    finish();
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    showWarning(R.string.an_error_occurred);
+                }
+            });
         }
     }
 

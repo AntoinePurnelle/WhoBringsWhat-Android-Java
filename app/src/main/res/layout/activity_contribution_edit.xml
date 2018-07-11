@@ -27,6 +27,8 @@
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/card_horizontal_margin"
+        android:layout_marginStart="@dimen/card_horizontal_margin"
         android:orientation="vertical"
         android:padding="@dimen/large">
 
@@ -59,7 +61,7 @@
                 android:id="@+id/contribution_edit_servings_et"
                 style="@style/ET"
                 android:ems="10"
-                android:hint="@string/servings"
+                android:hint="@string/servings_optional"
                 android:inputType="number"
                 tools:text="100" />
         </android.support.design.widget.TextInputLayout>
@@ -103,7 +105,7 @@
                 style="@style/ET"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
-                android:hint="@string/courses"
+                android:hint="@string/course"
                 android:inputType="none"
                 tools:text="Main" />
         </android.support.design.widget.TextInputLayout>

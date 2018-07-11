@@ -196,7 +196,7 @@ public class Contribution implements Parcelable {
                 ",\n unit='" + unit + '\'' +
                 ",\n type='" + type + '\'' +
                 ",\n comment='" + comment + '\'' +
-                ",\n user=" + user.getId() +
+                ",\n user=" + ((user != null) ? user.getId() : "null") +
                 ",\n contributor=" + contributor +
                 ",\n isDrink=" + isDrink +
                 "\n}";

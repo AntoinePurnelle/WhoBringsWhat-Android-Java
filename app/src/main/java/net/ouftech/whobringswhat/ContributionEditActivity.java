@@ -19,28 +19,38 @@ package net.ouftech.whobringswhat;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
+import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.text.TextUtils;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.evernote.android.state.State;
 
 import net.ouftech.whobringswhat.commons.BaseActivity;
+import net.ouftech.whobringswhat.commons.Logger;
 import net.ouftech.whobringswhat.model.Contribution;
+import net.ouftech.whobringswhat.model.Event;
+import net.ouftech.whobringswhat.model.FirestoreManager;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 
-import static net.ouftech.whobringswhat.model.Contribution.CONTRIBUTION_TYPES;
+import static net.ouftech.whobringswhat.model.Contribution.CONTRIBUTION_TYPE_APPETIZER;
+import static net.ouftech.whobringswhat.model.Contribution.CONTRIBUTION_TYPE_DESSERT;
+import static net.ouftech.whobringswhat.model.Contribution.CONTRIBUTION_TYPE_MAIN;
+import static net.ouftech.whobringswhat.model.Contribution.CONTRIBUTION_TYPE_STARTER;
 
 public class ContributionEditActivity extends BaseActivity {
 
     public static final String CONTRIBUTION_EXTRA = "CONTRIBUTION_EXTRA";
     public static final String TYPE_EXTRA = "TYPE_EXTRA";
+    public static final String EVENT_EXTRA = "EVENT_EXTRA";
 
     @BindView(R.id.contribution_edit_name_et)
     EditText nameEt;
@@ -63,6 +73,8 @@ public class ContributionEditActivity extends BaseActivity {
 
     @State
     private Contribution contribution;
+    @State
+    private Event event;
     @State // Whether it's a new contribution or the update of an existing one
     private boolean contributionCreation = false;
     @State
@@ -70,6 +82,7 @@ public class ContributionEditActivity extends BaseActivity {
     private int titleRes;
 
     List<String> types;
+    String courses[];
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +90,7 @@ public class ContributionEditActivity extends BaseActivity {
 
         if (savedInstanceState == null) {
             contribution = getIntent().getParcelableExtra(CONTRIBUTION_EXTRA);
+            event = getIntent().getParcelableExtra(EVENT_EXTRA);
 
             if (contribution != null) { // First onCreate with an existing Contribution
                 saveButton.setText(R.string.save_contribution);
@@ -92,6 +106,7 @@ public class ContributionEditActivity extends BaseActivity {
         if (contribution == null) {
             contribution = new Contribution();
             contribution.setType(getIntent().getStringExtra(TYPE_EXTRA));
+            contribution.setContributor(FirestoreManager.getCurrentUser().getName());
         }
 
         nameEt.setText(contribution.getName());
@@ -105,7 +120,20 @@ public class ContributionEditActivity extends BaseActivity {
         commentEt.setText(contribution.getComment());
         drinkCb.setChecked(contribution.isDrink());
 
-        types = Arrays.asList(CONTRIBUTION_TYPES);
+        types = new ArrayList<>();
+        if (event.hasAppetizer())
+            types.add(CONTRIBUTION_TYPE_APPETIZER);
+        if (event.hasStarter())
+            types.add(CONTRIBUTION_TYPE_STARTER);
+        if (event.hasMain())
+            types.add(CONTRIBUTION_TYPE_MAIN);
+        if (event.hasDessert())
+            types.add(CONTRIBUTION_TYPE_DESSERT);
+
+        courses = new String[types.size()];
+        for (int i = 0; i< types.size(); i++)
+            courses[i] = Contribution.getTypePrint(this, types.get(i));
+
 
         if (getSupportActionBar() != null)
             getSupportActionBar().setTitle(titleRes);
@@ -115,7 +143,7 @@ public class ContributionEditActivity extends BaseActivity {
     public void onCourseEtClicked() {
         new AlertDialog.Builder(this)
                 .setTitle(R.string.courses)
-                .setSingleChoiceItems(getResources().getStringArray(R.array.courses_array),
+                .setSingleChoiceItems(courses,
                         types.indexOf(contribution.getType()),
                         (dialog, which) -> {
                             contribution.setType(types.get(which));
@@ -133,12 +161,96 @@ public class ContributionEditActivity extends BaseActivity {
     @OnClick(R.id.event_edit_save_button)
     public void onSaveButtonClicked() {
         if (checkValidity()) {
+            contribution.setName(nameEt.getText().toString());
+            contribution.setContributor(contributorEt.getText().toString());
+            if (!TextUtils.isEmpty(servingsEt.getText().toString()))
+                contribution.setServings(Integer.parseInt(servingsEt.getText().toString()));
+            if (!TextUtils.isEmpty(quantityEt.getText().toString()))
+                contribution.setQuantity(Integer.parseInt(quantityEt.getText().toString()));
+            contribution.setUnit(unitEt.getText().toString());
+            contribution.setComment(commentEt.getText().toString());
 
+            saveContribution();
+        }
+    }
+
+    private void saveContribution() {
+        if (contributionCreation) {
+            Logger.d(getLogTag(), String.format("Creating contribution %s", contribution));
+            FirestoreManager.addContribution(event, contribution, new FirestoreManager.SimpleQueryListener() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Logger.d(getLogTag(), "Contribution created");
+                    Toast.makeText(ContributionEditActivity.this, R.string.contribution_created, Toast.LENGTH_LONG).show();
+                    getIntent().putExtra(CONTRIBUTION_EXTRA, contribution);
+                    setResult(RESULT_OK, getIntent());
+                    finish();
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    showWarning(R.string.an_error_occurred);
+                }
+            });
+        } else {
+            Logger.d(getLogTag(), String.format("Updating contribution %s", event));
+            FirestoreManager.updateContribution(event, contribution, new FirestoreManager.SimpleQueryListener() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Logger.d(getLogTag(), "Contribution saved");
+                    Toast.makeText(ContributionEditActivity.this, R.string.contribution_saved, Toast.LENGTH_LONG).show();
+                    getIntent().putExtra(CONTRIBUTION_EXTRA, contribution);
+                    setResult(RESULT_OK, getIntent());
+                    finish();
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    showWarning(R.string.an_error_occurred);
+                }
+            });
         }
     }
 
     private boolean checkValidity() {
+        // Checks all mandatory fields are filled
+        if (nameEt.getText().length() == 0
+                || contributorEt.getText().length() == 0
+                || courseEt.getText().length() == 0) {
+            showWarning(R.string.please_fill_non_optional);
+            return false;
+        }
+
+        // Checks that the value in the servings EditText is an integer
+        if (!TextUtils.isEmpty(servingsEt.getText().toString())) {
+            try {
+                Integer.parseInt(servingsEt.getText().toString());
+            } catch (NumberFormatException e) {
+                showWarning(R.string.please_enter_valid_servings);
+                return false;
+            }
+        }
+
+        // Checks that the value in the quantity EditText is an integer
+        if (!TextUtils.isEmpty(quantityEt.getText().toString())) {
+            try {
+                Integer.parseInt(quantityEt.getText().toString());
+            } catch (NumberFormatException e) {
+                showWarning(R.string.please_enter_valid_servings);
+                return false;
+            }
+        }
+
         return true;
+    }
+
+    /**
+     * Displays a Snackbar with the given message
+     *
+     * @param message Message to display
+     */
+    private void showWarning(@StringRes int message) {
+        Snackbar.make(saveButton, message, Snackbar.LENGTH_LONG).show();
     }
 
     public Contribution getContribution() {
@@ -147,6 +259,14 @@ public class ContributionEditActivity extends BaseActivity {
 
     public void setContribution(Contribution contribution) {
         this.contribution = contribution;
+    }
+
+    public Event getEvent() {
+        return event;
+    }
+
+    public void setEvent(Event event) {
+        this.event = event;
     }
 
     public boolean isContributionCreation() {

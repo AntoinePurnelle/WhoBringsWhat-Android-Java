@@ -47,6 +47,8 @@
 
     <string name="event_created">Événement créé</string>
     <string name="event_saved">Événement sauvé</string>
+    <string name="contribution_created">Contribution créée</string>
+    <string name="contribution_saved">Contribution sauvée</string>
     <string name="new_event">Nouvel Événement</string>
     <string name="event_edit">Édition de l\'Événement</string>
     <string name="edit_event">Modifier l\'événement</string>

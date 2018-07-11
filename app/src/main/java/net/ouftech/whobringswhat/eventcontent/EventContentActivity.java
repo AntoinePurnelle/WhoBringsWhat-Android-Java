@@ -170,6 +170,7 @@ public class EventContentActivity extends BaseActivity {
             Intent intent = new Intent(EventContentActivity.this, ContributionEditActivity.class);
             intent.putExtra(ContributionEditActivity.TYPE_EXTRA, type);
             intent.putExtra(ContributionEditActivity.CONTRIBUTION_EXTRA, getContribution(type, position));
+            intent.putExtra(ContributionEditActivity.EVENT_EXTRA, event);
             startActivity(intent);
         }
 
@@ -177,6 +178,7 @@ public class EventContentActivity extends BaseActivity {
         public void onAddContributionClicked(String type) {
             Intent intent = new Intent(EventContentActivity.this, ContributionEditActivity.class);
             intent.putExtra(ContributionEditActivity.TYPE_EXTRA, type);
+            intent.putExtra(ContributionEditActivity.EVENT_EXTRA, event);
             startActivity(intent);
         }
     };

@@ -362,6 +362,27 @@ public class FirestoreManager {
                 .collection(EVENTS_COLLECTIONS_NAME).document(event.getId())
                 .collection(CONTRIBUTIONS_COLLECTIONS_NAME).document();
         contribution.setId(documentReference.getId());
+        contribution.setUser(db.collection(USERS_COLLECTIONS_NAME).document(currentUser.getFirebaseId()));
+
+        documentReference
+                .set(contribution)
+                .addOnSuccessListener(listener::onSuccess)
+                .addOnFailureListener(listener::onFailure);
+    }
+
+    /**
+     * Saves {@link Contribution} document to Firestore.<br/>
+     * CAUTION: This method will save every field of the {@link Contribution} object to save them in Firestore, even the NULL ones!<br/>
+     * Calling this method will replace anything stored on Firestore for that document.
+     *
+     * @param event        {@link Event} in which to save the Contribution
+     * @param contribution {@link Contribution} to save as a Firestore document
+     * @param listener     Query Listener for success and failure callbacks
+     */
+    public static void updateContribution(@NonNull Event event, @NonNull Contribution contribution, @NonNull SimpleQueryListener listener) {
+        DocumentReference documentReference = db
+                .collection(EVENTS_COLLECTIONS_NAME).document(event.getId())
+                .collection(CONTRIBUTIONS_COLLECTIONS_NAME).document(contribution.getId());
 
         documentReference
                 .set(contribution)
