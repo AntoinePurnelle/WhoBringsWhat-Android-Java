@@ -60,6 +60,7 @@ public class EventContentActivity extends BaseActivity {
 
     public static final String EVENT_EXTRA = "EVENT_EXTRA";
     public static final int EVENT_EDIT_REQUEST_CODE = 1000;
+    public static final int CONTRIBUTION_EDIT_REQUEST_CODE = 1001;
 
     @BindView(R.id.events_content_rv)
     RecyclerView rv;
@@ -171,7 +172,7 @@ public class EventContentActivity extends BaseActivity {
             intent.putExtra(ContributionEditActivity.TYPE_EXTRA, type);
             intent.putExtra(ContributionEditActivity.CONTRIBUTION_EXTRA, getContribution(type, position));
             intent.putExtra(ContributionEditActivity.EVENT_EXTRA, event);
-            startActivity(intent);
+            startActivityForResult(intent, CONTRIBUTION_EDIT_REQUEST_CODE);
         }
 
         @Override
@@ -179,7 +180,7 @@ public class EventContentActivity extends BaseActivity {
             Intent intent = new Intent(EventContentActivity.this, ContributionEditActivity.class);
             intent.putExtra(ContributionEditActivity.TYPE_EXTRA, type);
             intent.putExtra(ContributionEditActivity.EVENT_EXTRA, event);
-            startActivity(intent);
+            startActivityForResult(intent, CONTRIBUTION_EDIT_REQUEST_CODE);
         }
     };
 
@@ -231,6 +232,8 @@ public class EventContentActivity extends BaseActivity {
 
             if (getSupportActionBar() != null)
                 getSupportActionBar().setTitle(event.getName());
+        } else if (requestCode == CONTRIBUTION_EDIT_REQUEST_CODE && resultCode == RESULT_OK) {
+            loadContributions();
         }
     }
 
