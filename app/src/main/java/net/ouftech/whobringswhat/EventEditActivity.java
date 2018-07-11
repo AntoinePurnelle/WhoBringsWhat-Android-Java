@@ -49,23 +49,23 @@ public class EventEditActivity extends BaseActivity {
 
     public static final String EVENT_EXTRA = "EVENT_EXTRA";
 
-    @BindView(R.id.event_creation_name_et)
+    @BindView(R.id.event_edit_name_et)
     EditText nameEt;
-    @BindView(R.id.event_creation_description_et)
+    @BindView(R.id.event_edit_description_et)
     EditText descriptionEt;
-    @BindView(R.id.event_creation_start_time_et)
+    @BindView(R.id.event_edit_start_time_et)
     EditText startTimeEt;
-    @BindView(R.id.event_creation_end_time_et)
+    @BindView(R.id.event_edit_end_time_et)
     EditText endTimeEt;
-    @BindView(R.id.event_creation_location_et)
+    @BindView(R.id.event_edit_location_et)
     EditText locationEt;
-    @BindView(R.id.event_creation_servings_et)
+    @BindView(R.id.event_edit_servings_et)
     EditText servingsEt;
-    @BindView(R.id.event_creation_courses_et)
+    @BindView(R.id.event_edit_courses_et)
     EditText coursesEt;
-    @BindView(R.id.event_creation_budget_et)
+    @BindView(R.id.event_edit_budget_et)
     EditText budgetEt;
-    @BindView(R.id.event_creation_save_button)
+    @BindView(R.id.event_edit_save_button)
     TextView saveButton;
 
     @State
@@ -98,7 +98,6 @@ public class EventEditActivity extends BaseActivity {
                 // No event in Intent --> new event
                 eventCreation = true;
                 saveButton.setText(R.string.create_event);
-                getSupportActionBar().setTitle(R.string.create_event);
                 titleRes = R.string.new_event;
             }
         }
@@ -132,7 +131,7 @@ public class EventEditActivity extends BaseActivity {
         editText.setText(dateString);
     }
 
-    @OnClick(R.id.event_creation_start_time_et)
+    @OnClick(R.id.event_edit_start_time_et)
     public void onStartTimeEtClicked() {
         showDateTimePicker(startDate, dateTime -> {
             startDate = dateTime;
@@ -140,7 +139,7 @@ public class EventEditActivity extends BaseActivity {
         });
     }
 
-    @OnClick(R.id.event_creation_end_time_et)
+    @OnClick(R.id.event_edit_end_time_et)
     public void onEndTimeEtClicked() {
         showDateTimePicker(endDate, dateTime -> {
             endDate = dateTime;
@@ -171,7 +170,7 @@ public class EventEditActivity extends BaseActivity {
         }, date.get(Calendar.YEAR), date.get(Calendar.MONTH), date.get(Calendar.DATE)).show();
     }
 
-    @OnClick(R.id.event_creation_courses_et)
+    @OnClick(R.id.event_edit_courses_et)
     public void onCoursesEtClicked() {
         // Open multiselect dialog with titles and selected choices
         new AlertDialog.Builder(this)
@@ -196,7 +195,7 @@ public class EventEditActivity extends BaseActivity {
         coursesEt.setText(TextUtils.join(", ", selectedCourses));
     }
 
-    @OnClick(R.id.event_creation_save_button)
+    @OnClick(R.id.event_edit_save_button)
     public void onSaveButtonClicked() {
         if (checkValidity()) {
             event.setName(nameEt.getText().toString());
@@ -308,7 +307,7 @@ public class EventEditActivity extends BaseActivity {
 
     @Override
     protected int getLayoutId() {
-        return R.layout.activity_event_creation;
+        return R.layout.activity_event_edit;
     }
 
     public Event getEvent() {

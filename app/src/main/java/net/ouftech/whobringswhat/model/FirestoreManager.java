@@ -48,7 +48,9 @@ public class FirestoreManager {
      * @param id ID of the document
      * @return {@link DocumentReference} of the user with the given id
      */
-    public static DocumentReference getUserReferenceForId(@NonNull String id) {
+    public static DocumentReference getUserReferenceForId(String id) {
+        if (id == null)
+            return null;
         return db.collection(USERS_COLLECTIONS_NAME).document(id);
     }
 
@@ -162,7 +164,9 @@ public class FirestoreManager {
      * @param id ID of the document
      * @return {@link DocumentReference} of the event with the given id
      */
-    public static DocumentReference getEventReferenceForId(@NonNull String id) {
+    public static DocumentReference getEventReferenceForId(String id) {
+        if (id == null)
+            return null;
         return db.collection(EVENTS_COLLECTIONS_NAME).document(id);
     }
 
@@ -307,7 +311,9 @@ public class FirestoreManager {
      * @param id ID of the document
      * @return {@link DocumentReference} of the contribution with the given id
      */
-    public static DocumentReference getContributionReferenceForId(@NonNull String id) {
+    public static DocumentReference getContributionReferenceForId(String id) {
+        if (id == null)
+            return null;
         return db.collection(CONTRIBUTIONS_COLLECTIONS_NAME).document(id);
     }
 

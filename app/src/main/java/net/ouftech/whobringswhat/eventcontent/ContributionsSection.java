@@ -32,10 +32,10 @@ import io.github.luizgrp.sectionedrecyclerviewadapter.SectionParameters;
 public class ContributionsSection extends Section {
 
     private List<Contribution> contributions;
-    private String title;
+    private String type;
     private ContributionClickListener listener;
 
-    public ContributionsSection(@NonNull List<Contribution> contributions, @NonNull String title, @NonNull ContributionClickListener listener) {
+    public ContributionsSection(@NonNull List<Contribution> contributions, @NonNull String type, @NonNull ContributionClickListener listener) {
         super(SectionParameters.builder()
                 .itemResourceId(R.layout.contribution_list_item)
                 .headerResourceId(R.layout.contribution_list_header)
@@ -44,7 +44,7 @@ public class ContributionsSection extends Section {
                 .build());
 
         this.contributions = contributions;
-        this.title = title;
+        this.type = type;
         this.listener = listener;
 
         if (CollectionUtils.isEmpty(contributions))
@@ -65,6 +65,7 @@ public class ContributionsSection extends Section {
     public void onBindItemViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (position >= 0 && position < CollectionUtils.getSize(contributions)) {
             ((ContributionViewHolder) holder).bind(contributions.get(position));
+            holder.itemView.setOnClickListener(v -> listener.onEditContributionClicked(position, type));
         }
     }
 
@@ -75,7 +76,7 @@ public class ContributionsSection extends Section {
 
     @Override
     public void onBindHeaderViewHolder(RecyclerView.ViewHolder holder) {
-        ((ContributionHeaderViewHolder) holder).bind(title);
+        ((ContributionHeaderViewHolder) holder).bind(type);
     }
 
     @Override
@@ -85,7 +86,7 @@ public class ContributionsSection extends Section {
 
     @Override
     public void onBindFooterViewHolder(RecyclerView.ViewHolder holder) {
-        ((ContributionFooterViewHolder)holder).getFooterTv().setOnClickListener(v -> listener.onAddContributionClicked());
+        ((ContributionFooterViewHolder)holder).getFooterTv().setOnClickListener(v -> listener.onAddContributionClicked(type));
     }
 
     @Override
@@ -94,8 +95,8 @@ public class ContributionsSection extends Section {
     }
 
     public interface ContributionClickListener {
-        void onEditContributionClicked(int position);
+        void onEditContributionClicked(int position, String type);
 
-        void onAddContributionClicked();
+        void onAddContributionClicked(String type);
     }
 }

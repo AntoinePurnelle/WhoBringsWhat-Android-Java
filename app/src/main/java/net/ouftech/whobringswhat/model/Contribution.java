@@ -35,6 +35,12 @@ public class Contribution implements Parcelable {
     public static final String CONTRIBUTION_TYPE_MAIN = "main";
     public static final String CONTRIBUTION_TYPE_DESSERT = "dessert";
 
+    public static final String[] CONTRIBUTION_TYPES = {
+            CONTRIBUTION_TYPE_APPETIZER,
+            CONTRIBUTION_TYPE_STARTER,
+            CONTRIBUTION_TYPE_MAIN, CONTRIBUTION_TYPE_DESSERT
+    };
+
     private String id;
     private String name;
     private int servings;
@@ -158,8 +164,13 @@ public class Contribution implements Parcelable {
 
     @NonNull
     public String getTypePrint(@NonNull Context context) {
+        return getTypePrint(context, type);
+    }
+
+    @NonNull
+    public static String getTypePrint(@NonNull Context context, String type) {
         if (type == null)
-            return context.getString(R.string.main);
+            return "";
 
         switch (type) {
             case Contribution.CONTRIBUTION_TYPE_APPETIZER:
@@ -169,8 +180,9 @@ public class Contribution implements Parcelable {
             case Contribution.CONTRIBUTION_TYPE_DESSERT:
                 return context.getString(R.string.dessert);
             case Contribution.CONTRIBUTION_TYPE_MAIN:
-            default:
                 return context.getString(R.string.main);
+            default:
+                return "";
         }
     }
 

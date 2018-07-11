@@ -30,9 +30,22 @@
     <string name="end_time_optional">End Time (optional)</string>
     <string name="description_optional">Description (optional)</string>
     <string name="location">Location</string>
+    <string name="servings">Servings</string>
     <string name="servings_optional">Servings (optional)</string>
     <string name="budget_optional">Budget (optional)</string>
     <string name="courses">Courses</string>
+
+    <string name="contributor">Contributor</string>
+    <string name="quantity_optional">Quantity (optional)</string>
+    <string name="unit_optional">Unit (optional)</string>
+    <string name="course">Course</string>
+    <string name="comment_optional">Comment (optional)</string>
+    <string name="drink">Drink</string>
+
+    <string name="create_contribution">Create contribution</string>
+    <string name="save_contribution">Save contribution</string>
+    <string name="edit_contribution">Edit Contribution</string>
+    <string name="new_contribution">New Contribution</string>
 
     <string name="create_event">Create event</string>
     <string name="save_event">Save event</string>

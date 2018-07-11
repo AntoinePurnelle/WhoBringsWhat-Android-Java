@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!--
+  ~ Copyright 2018 Antoine PURNELLE
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~     https://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  ~ See the License for the specific language governing permissions and
+  ~ limitations under the License.
+  -->
+
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="@dimen/card_horizontal_margin"
+        android:layout_marginStart="@dimen/card_horizontal_margin"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <android.support.design.widget.TextInputLayout style="@style/TIL">
+
+            <EditText
+                android:id="@+id/event_edit_name_et"
+                style="@style/ET"
+                android:hint="@string/name"
+                tools:text="Nanodegree Party" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout style="@style/TIL">
+
+            <EditText
+                android:id="@+id/event_edit_description_et"
+                style="@style/ET"
+                android:hint="@string/description_optional" />
+        </android.support.design.widget.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:baselineAligned="false">
+
+            <android.support.design.widget.TextInputLayout
+                style="@style/TIL"
+                android:layout_width="0dp"
+                android:layout_weight="1">
+
+                <EditText
+                    android:id="@+id/event_edit_start_time_et"
+                    style="@style/ET"
+                    android:hint="@string/start_time"
+                    android:inputType="none"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:drawableEnd="@drawable/ic_date_range_black_24dp"
+                    tools:text="15/08 at 13:00" />
+            </android.support.design.widget.TextInputLayout>
+
+            <android.support.design.widget.TextInputLayout
+                style="@style/TIL"
+                android:layout_width="0dp"
+                android:layout_weight="1">
+
+                <EditText
+                    android:id="@+id/event_edit_end_time_et"
+                    style="@style/ET"
+                    android:hint="@string/end_time_optional"
+                    android:inputType="none"
+                    android:focusable="false"
+                    android:focusableInTouchMode="false"
+                    android:drawableEnd="@drawable/ic_date_range_black_24dp" />
+
+            </android.support.design.widget.TextInputLayout>
+
+        </LinearLayout>
+
+        <android.support.design.widget.TextInputLayout style="@style/TIL">
+
+            <EditText
+                android:id="@+id/event_edit_location_et"
+                style="@style/ET"
+                android:hint="@string/location"
+                tools:text="Latham St, Mountain View" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout style="@style/TIL">
+
+            <EditText
+                android:id="@+id/event_edit_servings_et"
+                style="@style/ET"
+                android:hint="@string/servings_optional"
+                android:ems="10"
+                android:inputType="number"
+                tools:text="4000" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout style="@style/TIL">
+
+            <EditText
+                android:id="@+id/event_edit_courses_et"
+                style="@style/ET"
+                android:hint="@string/courses"
+                android:inputType="none"
+                android:focusable="false"
+                android:focusableInTouchMode="false"
+                tools:text="Appetizers, Main, Dessert" />
+        </android.support.design.widget.TextInputLayout>
+
+        <android.support.design.widget.TextInputLayout style="@style/TIL">
+
+            <EditText
+                android:id="@+id/event_edit_budget_et"
+                style="@style/ET"
+                android:hint="@string/budget_optional" />
+        </android.support.design.widget.TextInputLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/event_edit_save_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:layout_marginTop="@dimen/normal"
+            android:background="@drawable/rounded_corner_button"
+            android:elevation="@dimen/default_elevation"
+            android:padding="@dimen/normal"
+            android:text="@string/create_event"
+            android:textAllCaps="true"
+            android:textColor="@color/white"
+            android:textSize="@dimen/text_size_title"
+            tools:ignore="UnusedAttribute" />
+
+    </LinearLayout>
+
+</ScrollView>

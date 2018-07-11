@@ -27,6 +27,8 @@ import android.util.Log;
 
 import com.evernote.android.state.StateSaver;
 
+import net.ouftech.whobringswhat.R;
+
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
@@ -193,6 +195,10 @@ public abstract class BaseActivity extends AppCompatActivity {
 
     public void setRunning(boolean running) {
         this.running = running;
+    }
+
+    public boolean isTablet() {
+        return getResources().getBoolean(R.bool.isTablet);
     }
 
     // endregion Lifecycle

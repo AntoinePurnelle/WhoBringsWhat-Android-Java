@@ -26,11 +26,25 @@
     <string name="end_time_optional">Fin (facultatif)</string>
     <string name="description_optional">Desctiption (facultatif)</string>
     <string name="location">Lieu</string>
+    <string name="servings">Couverts</string>
     <string name="servings_optional">Couverts (facultatif)</string>
     <string name="budget_optional">Budget (facultatif)</string>
     <string name="courses">Services</string>
-    <string name="create_event">Créer un événement</string>
-    <string name="save_event">Sauver l\'événement</string>
+    <string name="contributor">Contributeur</string>
+    <string name="quantity_optional">Quantité (facultatif)</string>
+    <string name="unit_optional">Unité (optional)</string>
+    <string name="course">Service</string>
+    <string name="comment_optional">Commentaire (facultatif)</string>
+    <string name="drink">Boisson</string>
+
+    <string name="create_contribution">Create contribution</string>
+    <string name="save_contribution">Save contribution</string>
+    <string name="new_contribution">Nouvelle Contribution</string>
+
+    <string name="create_event">Créer une contribution</string>
+    <string name="save_event">Sauver la contribution</string>
+    <string name="edit_contribution">Édition de la Contribution</string>
+
     <string name="event_created">Événement créé</string>
     <string name="event_saved">Événement sauvé</string>
     <string name="new_event">Nouvel Événement</string>

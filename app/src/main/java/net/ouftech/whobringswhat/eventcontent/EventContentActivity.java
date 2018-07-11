@@ -33,6 +33,7 @@ import android.widget.ProgressBar;
 
 import com.evernote.android.state.State;
 
+import net.ouftech.whobringswhat.ContributionEditActivity;
 import net.ouftech.whobringswhat.EventEditActivity;
 import net.ouftech.whobringswhat.R;
 import net.ouftech.whobringswhat.commons.BaseActivity;
@@ -42,11 +43,18 @@ import net.ouftech.whobringswhat.model.Event;
 import net.ouftech.whobringswhat.model.FirestoreManager;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.OnClick;
 import io.github.luizgrp.sectionedrecyclerviewadapter.SectionedRecyclerViewAdapter;
+
+import static net.ouftech.whobringswhat.model.Contribution.CONTRIBUTION_TYPE_APPETIZER;
+import static net.ouftech.whobringswhat.model.Contribution.CONTRIBUTION_TYPE_DESSERT;
+import static net.ouftech.whobringswhat.model.Contribution.CONTRIBUTION_TYPE_MAIN;
+import static net.ouftech.whobringswhat.model.Contribution.CONTRIBUTION_TYPE_STARTER;
 
 public class EventContentActivity extends BaseActivity {
 
@@ -69,6 +77,7 @@ public class EventContentActivity extends BaseActivity {
     private ArrayList<Contribution> mainContributions;
     @State
     private ArrayList<Contribution> dessertContributions;
+    Map<String, ArrayList<Contribution>> contributionsLists;
 
     @State
     private Event event;
@@ -90,24 +99,46 @@ public class EventContentActivity extends BaseActivity {
 
         if (getSupportActionBar() != null)
             getSupportActionBar().setTitle(event.getName());
+
+        if (!isTablet())
+        rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0 )
+                    fab.hide();
+                else
+                    fab.show();
+            }
+        });
     }
 
     private void loadContributions() {
         setProgressBarVisible(true);
 
+        if (contributionsLists == null)
+            contributionsLists = new HashMap<>();
+        else
+            contributionsLists.clear();
+
         FirestoreManager.fetchContributionsForEvent(event, new FirestoreManager.ContributionsQueryListener() {
             @Override
             public void onSuccess(@NonNull List<Contribution> contributions) {
                 Logger.d(getLogTag(), String.format("Fetched %s contributions", contributions.size()));
+
                 appetizerContributions = new ArrayList<>();
+                contributionsLists.put(CONTRIBUTION_TYPE_APPETIZER, appetizerContributions);
                 starterContributions = new ArrayList<>();
+                contributionsLists.put(CONTRIBUTION_TYPE_STARTER, starterContributions);
                 mainContributions = new ArrayList<>();
+                contributionsLists.put(CONTRIBUTION_TYPE_MAIN, mainContributions);
                 dessertContributions = new ArrayList<>();
+                contributionsLists.put(CONTRIBUTION_TYPE_DESSERT, dessertContributions);
 
                 for (Contribution contribution : contributions) {
                     String type = contribution.getType();
                     switch (type) {
-                        case Contribution.CONTRIBUTION_TYPE_APPETIZER:
+                        case CONTRIBUTION_TYPE_APPETIZER:
                             appetizerContributions.add(contribution);
                             break;
                         case Contribution.CONTRIBUTION_TYPE_STARTER:
@@ -133,61 +164,42 @@ public class EventContentActivity extends BaseActivity {
         });
     }
 
+    private ContributionsSection.ContributionClickListener contributionClickListener =  new ContributionsSection.ContributionClickListener() {
+        @Override
+        public void onEditContributionClicked(int position, String type) {
+            Intent intent = new Intent(EventContentActivity.this, ContributionEditActivity.class);
+            intent.putExtra(ContributionEditActivity.TYPE_EXTRA, type);
+            intent.putExtra(ContributionEditActivity.CONTRIBUTION_EXTRA, getContribution(type, position));
+            startActivity(intent);
+        }
+
+        @Override
+        public void onAddContributionClicked(String type) {
+            Intent intent = new Intent(EventContentActivity.this, ContributionEditActivity.class);
+            intent.putExtra(ContributionEditActivity.TYPE_EXTRA, type);
+            startActivity(intent);
+        }
+    };
+
+    private Contribution getContribution(String type, int position) {
+        return contributionsLists.get(type).get(position);
+    }
+
     private void displayEventContent() {
         sectionedAdapter.removeAllSections();
 
         sectionedAdapter.addSection(new EventDetailsSection(event));
         if (event.hasAppetizer())
-            sectionedAdapter.addSection(new ContributionsSection(appetizerContributions, getString(R.string.appetizer), new ContributionsSection.ContributionClickListener() {
-                @Override
-                public void onEditContributionClicked(int position) {
-                    // TODO
-                }
-
-                @Override
-                public void onAddContributionClicked() {
-                    // TODO
-                }
-            }));
+            sectionedAdapter.addSection(new ContributionsSection(appetizerContributions, CONTRIBUTION_TYPE_APPETIZER, contributionClickListener));
 
         if (event.hasStarter())
-            sectionedAdapter.addSection(new ContributionsSection(starterContributions, getString(R.string.starter), new ContributionsSection.ContributionClickListener() {
-                @Override
-                public void onEditContributionClicked(int position) {
-                    // TODO
-                }
-
-                @Override
-                public void onAddContributionClicked() {
-                    // TODO
-                }
-            }));
+            sectionedAdapter.addSection(new ContributionsSection(starterContributions, CONTRIBUTION_TYPE_STARTER, contributionClickListener));
 
         if (event.hasMain())
-            sectionedAdapter.addSection(new ContributionsSection(mainContributions, getString(R.string.main), new ContributionsSection.ContributionClickListener() {
-                @Override
-                public void onEditContributionClicked(int position) {
-                    // TODO
-                }
-
-                @Override
-                public void onAddContributionClicked() {
-                    // TODO
-                }
-            }));
+            sectionedAdapter.addSection(new ContributionsSection(mainContributions, CONTRIBUTION_TYPE_MAIN, contributionClickListener));
 
         if (event.hasDessert())
-            sectionedAdapter.addSection(new ContributionsSection(dessertContributions, getString(R.string.dessert), new ContributionsSection.ContributionClickListener() {
-                @Override
-                public void onEditContributionClicked(int position) {
-                    // TODO
-                }
-
-                @Override
-                public void onAddContributionClicked() {
-                    // TODO
-                }
-            }));
+            sectionedAdapter.addSection(new ContributionsSection(dessertContributions, CONTRIBUTION_TYPE_DESSERT, contributionClickListener));
 
         sectionedAdapter.notifyDataSetChanged();
         setProgressBarVisible(false);

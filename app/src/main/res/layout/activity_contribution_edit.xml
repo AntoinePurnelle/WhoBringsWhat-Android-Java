@@ -22,41 +22,53 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true"
-    app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context=".MainActivity">
+    app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="@dimen/card_horizontal_margin"
-        android:layout_marginStart="@dimen/card_horizontal_margin"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="@dimen/large">
 
         <android.support.design.widget.TextInputLayout style="@style/TIL">
 
             <EditText
-                android:id="@+id/event_creation_name_et"
+                android:id="@+id/contribution_edit_name_et"
                 style="@style/ET"
                 android:hint="@string/name"
-                android:inputType="text"
-                tools:text="Nanodegree Party" />
+                tools:text="Homemade Pizza" />
+        </android.support.design.widget.TextInputLayout>
+
+        <CheckBox
+            android:id="@+id/contribution_edit_drink_cb"
+            style="@style/ET"
+            android:text="Drink" />
+
+        <android.support.design.widget.TextInputLayout style="@style/TIL">
+
+            <EditText
+                android:id="@+id/contribution_edit_contributor_et"
+                style="@style/ET"
+                android:hint="@string/contributor"
+                tools:text="Smith family" />
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout style="@style/TIL">
 
             <EditText
-                android:id="@+id/event_creation_description_et"
+                android:id="@+id/contribution_edit_servings_et"
                 style="@style/ET"
-                android:hint="@string/description_optional"
-                android:inputType="text" />
+                android:ems="10"
+                android:hint="@string/servings"
+                android:inputType="number"
+                tools:text="100" />
         </android.support.design.widget.TextInputLayout>
+
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:baselineAligned="false">
+            android:orientation="horizontal">
 
             <android.support.design.widget.TextInputLayout
                 style="@style/TIL"
@@ -64,14 +76,11 @@
                 android:layout_weight="1">
 
                 <EditText
-                    android:id="@+id/event_creation_start_time_et"
+                    android:id="@+id/contribution_edit_quantity_et"
                     style="@style/ET"
-                    android:hint="@string/start_time"
-                    android:inputType="none"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:drawableEnd="@drawable/ic_date_range_black_24dp"
-                    tools:text="15/08 at 13:00" />
+                    android:ems="10"
+                    android:hint="@string/quantity_optional"
+                    android:inputType="number" />
             </android.support.design.widget.TextInputLayout>
 
             <android.support.design.widget.TextInputLayout
@@ -80,14 +89,9 @@
                 android:layout_weight="1">
 
                 <EditText
-                    android:id="@+id/event_creation_end_time_et"
+                    android:id="@+id/contribution_edit_unit_et"
                     style="@style/ET"
-                    android:hint="@string/end_time_optional"
-                    android:inputType="none"
-                    android:focusable="false"
-                    android:focusableInTouchMode="false"
-                    android:drawableEnd="@drawable/ic_date_range_black_24dp" />
-
+                    android:hint="@string/unit_optional" />
             </android.support.design.widget.TextInputLayout>
 
         </LinearLayout>
@@ -95,42 +99,21 @@
         <android.support.design.widget.TextInputLayout style="@style/TIL">
 
             <EditText
-                android:id="@+id/event_creation_location_et"
+                android:id="@+id/contribution_edit_course_et"
                 style="@style/ET"
-                android:hint="@string/location"
-                android:inputType="text"
-                tools:text="Latham St, Mountain View" />
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout style="@style/TIL">
-
-            <EditText
-                android:id="@+id/event_creation_servings_et"
-                style="@style/ET"
-                android:hint="@string/servings_optional"
-                android:ems="10"
-                android:inputType="number"
-                tools:text="4000" />
-        </android.support.design.widget.TextInputLayout>
-
-        <android.support.design.widget.TextInputLayout style="@style/TIL">
-
-            <EditText
-                android:id="@+id/event_creation_courses_et"
-                style="@style/ET"
-                android:hint="@string/courses"
-                android:inputType="none"
                 android:focusable="false"
                 android:focusableInTouchMode="false"
-                tools:text="Appetizers, Main, Dessert" />
+                android:hint="@string/courses"
+                android:inputType="none"
+                tools:text="Main" />
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout style="@style/TIL">
 
             <EditText
-                android:id="@+id/event_creation_budget_et"
+                android:id="@+id/contribution_edit_comment_et"
                 style="@style/ET"
-                android:hint="@string/budget_optional" />
+                android:hint="@string/comment_optional" />
         </android.support.design.widget.TextInputLayout>
 
         <View
@@ -139,7 +122,7 @@
             android:layout_weight="1" />
 
         <TextView
-            android:id="@+id/event_creation_save_button"
+            android:id="@+id/event_edit_save_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="end"
@@ -147,7 +130,7 @@
             android:background="@drawable/rounded_corner_button"
             android:elevation="@dimen/default_elevation"
             android:padding="@dimen/normal"
-            android:text="@string/create_event"
+            android:text="@string/create_contribution"
             android:textAllCaps="true"
             android:textColor="@color/white"
             android:textSize="@dimen/text_size_title"

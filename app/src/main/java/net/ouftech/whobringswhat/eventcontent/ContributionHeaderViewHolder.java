@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import net.ouftech.whobringswhat.R;
+import net.ouftech.whobringswhat.model.Contribution;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -36,6 +37,6 @@ public class ContributionHeaderViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void bind(String type) {
-        headerTv.setText(type);
+        headerTv.setText(Contribution.getTypePrint(itemView.getContext(), type));
     }
 }
