@@ -124,12 +124,11 @@ public class Event implements Parcelable {
         this.time = time;
     }
 
-    @Nullable
     public long getEndTime() {
         return endTime;
     }
 
-    public void setEndTime(@Nullable long endTime) {
+    public void setEndTime(long endTime) {
         this.endTime = endTime;
     }
 
@@ -201,11 +200,12 @@ public class Event implements Parcelable {
         this.type = type;
     }
 
+    @Nullable
     public String getBudget() {
         return budget;
     }
 
-    public void setBudget(String budget) {
+    public void setBudget(@Nullable String budget) {
         this.budget = budget;
     }
 

@@ -20,12 +20,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/ElevatedView"
-    android:orientation="horizontal"
-    android:background="@drawable/shadow_item">
+    android:background="@drawable/shadow_item"
+    android:orientation="horizontal">
 
-    <ImageView
+    <android.support.v7.widget.AppCompatImageView
         android:id="@+id/contribution_image_iv"
-        style="@style/ContributionImageFood" />
+        style="@style/ContributionImageFood"
+        android:contentDescription="@string/contribution_type_food" />
 
     <LinearLayout
         android:layout_width="0dp"
@@ -67,6 +68,7 @@
                 android:id="@+id/contribution_servings_iv"
                 android:layout_width="@dimen/icon_default_size"
                 android:layout_height="@dimen/icon_default_size"
+                android:contentDescription="@string/servings"
                 app:srcCompat="@drawable/ic_people_black_24dp" />
 
         </LinearLayout>

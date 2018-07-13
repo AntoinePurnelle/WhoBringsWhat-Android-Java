@@ -61,10 +61,13 @@ public class ContributionViewHolder extends RecyclerView.ViewHolder {
 
         contributorTv.setText(contribution.getContributor());
 
-        if (contribution.isDrink())
+        if (contribution.isDrink()) {
             imageIv.setImageResource(R.drawable.ic_local_drink_black_24dp);
-        else
+            imageIv.setContentDescription(itemView.getContext().getString(R.string.contribution_type_drink));
+        } else {
             imageIv.setImageResource(R.drawable.ic_local_dining_black_24dp);
+            imageIv.setContentDescription(itemView.getContext().getString(R.string.contribution_type_food));
+        }
     }
 
 }

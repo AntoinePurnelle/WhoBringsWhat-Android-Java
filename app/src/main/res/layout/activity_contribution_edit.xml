@@ -47,7 +47,7 @@
             <CheckBox
                 android:id="@+id/contribution_edit_drink_cb"
                 style="@style/ET"
-                android:text="Drink" />
+                android:text="@string/drink" />
 
             <android.support.design.widget.TextInputLayout style="@style/TIL">
 
@@ -73,7 +73,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:baselineAligned="false">
 
                 <android.support.design.widget.TextInputLayout
                     style="@style/TIL"
