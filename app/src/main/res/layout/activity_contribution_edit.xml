@@ -107,7 +107,6 @@
                 <EditText
                     android:id="@+id/contribution_edit_course_et"
                     style="@style/ET"
-                    android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:hint="@string/course"
                     android:inputType="none"

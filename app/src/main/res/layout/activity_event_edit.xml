@@ -46,7 +46,8 @@
             <EditText
                 android:id="@+id/event_edit_description_et"
                 style="@style/ET"
-                android:hint="@string/description_optional" />
+                android:hint="@string/description_optional"
+                android:nextFocusForward="@+id/event_edit_start_time_et"/>
         </android.support.design.widget.TextInputLayout>
 
         <LinearLayout
@@ -65,7 +66,6 @@
                     style="@style/ET"
                     android:hint="@string/start_time"
                     android:inputType="none"
-                    android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:drawableEnd="@drawable/ic_date_range_black_24dp"
                     tools:text="15/08 at 13:00" />
@@ -81,7 +81,6 @@
                     style="@style/ET"
                     android:hint="@string/end_time_optional"
                     android:inputType="none"
-                    android:focusable="false"
                     android:focusableInTouchMode="false"
                     android:drawableEnd="@drawable/ic_date_range_black_24dp" />
 
@@ -116,7 +115,6 @@
                 style="@style/ET"
                 android:hint="@string/courses"
                 android:inputType="none"
-                android:focusable="false"
                 android:focusableInTouchMode="false"
                 tools:text="Appetizers, Main, Dessert" />
         </android.support.design.widget.TextInputLayout>

@@ -118,6 +118,21 @@ public class EventEditActivity extends BaseActivity {
 
         if (getSupportActionBar() != null)
             getSupportActionBar().setTitle(titleRes);
+
+        startTimeEt.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus)
+                onStartTimeEtClicked();
+        });
+
+        endTimeEt.setOnFocusChangeListener((view, hasFocus) -> {
+            if (hasFocus)
+                onEndTimeEtClicked();
+        });
+
+        coursesEt.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus)
+                onCoursesEtClicked();
+        });
     }
 
     /**

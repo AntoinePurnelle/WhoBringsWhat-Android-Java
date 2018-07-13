@@ -143,6 +143,11 @@ public class ContributionEditActivity extends BaseActivity {
 
         if (getSupportActionBar() != null)
             getSupportActionBar().setTitle(titleRes);
+
+        courseEt.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus)
+                onCourseEtClicked();
+        });
     }
 
     @OnClick(R.id.contribution_edit_course_et)
