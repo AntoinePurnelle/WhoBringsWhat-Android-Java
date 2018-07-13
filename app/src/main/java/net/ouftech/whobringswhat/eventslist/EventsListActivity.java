@@ -17,6 +17,7 @@
 package net.ouftech.whobringswhat.eventslist;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -28,6 +29,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -62,6 +64,9 @@ import io.fabric.sdk.android.Fabric;
 import io.github.luizgrp.sectionedrecyclerviewadapter.SectionedRecyclerViewAdapter;
 
 public class EventsListActivity extends BaseActivity {
+
+    public static final String SHARED_PREFS_NAME = "WBW_SHARED_PREFS";
+    public static final String UPCOMING_EVENTS_SHARED_PREF = "upcomingEvents";
 
     private static final int RC_SIGN_IN = 9108;
 
@@ -342,6 +347,7 @@ public class EventsListActivity extends BaseActivity {
                 }
 
                 displayEvents(pastEvents, upcomingEvents);
+                saveUpcomingEventsList(upcomingEvents);
             }
 
             @Override
@@ -349,6 +355,27 @@ public class EventsListActivity extends BaseActivity {
                 Logger.e(getLogTag(), String.format("Error while fetching events for user %s", firebaseUser.getUid()), e);
             }
         });
+    }
+
+    private void saveUpcomingEventsList(List<Event> upcomingEvents) {
+        if (isRunning()) {
+            StringBuilder upComingEventsString = new StringBuilder();
+
+            for (Event upcomingEvent : upcomingEvents) {
+                upComingEventsString
+                        .append("• ")
+                        .append(upcomingEvent.getName());
+                if (upcomingEvent.getTime() > 0)
+                    upComingEventsString
+                            .append(" - ")
+                            .append(DateUtils.formatDateTime(this, upcomingEvent.getTime(), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NUMERIC_DATE | DateUtils.FORMAT_SHOW_TIME))
+                            .append("\n");
+            }
+
+            SharedPreferences.Editor editor = getApplication().getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE).edit();
+            editor.putString(UPCOMING_EVENTS_SHARED_PREF, upComingEventsString.toString());
+            editor.apply();
+        }
     }
 
     private void displayEvents(@NonNull List<Event> pastEvents, @NonNull List<Event> upcomingEvents) {

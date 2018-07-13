@@ -82,8 +82,11 @@
     <string name="login_dialog_title">Connexion à Qui Apporte Quoi</string>
     <string name="login_dialog_message">En vous connectant, vous vous assurez de sauver les événements auxquels vous participez. Vous pourrez les retrouver à chaque fois que vous vous connectez à Qui Apporte Quoi</string>
     <string name="events_list_empty_message">Aucun événement à afficher. Appuyez sur le bouton + pour en créer un</string>
+    <string name="widget_events_list_empty_message">Aucun événement avenir à afficher. Ouvrez l\'app et appuyez sur le bouton + pour en créer un</string>
     <string name="events_list_empty_message_not_logged_in">Aucun événement à afficher. Connectez-vous ou appuyez sur le bouton + pour en créer un</string>
     <string name="contribution_type_food">Contribution de nourriture</string>
     <string name="contribution_type_drink">Contribution de boisson</string>
     <string name="start_end_times">Début et fin</string>
+    <string name="appwidget_text">Événements futurs</string>
+    <string name="add_widget">Ajouter un widget</string>
 </resources>
