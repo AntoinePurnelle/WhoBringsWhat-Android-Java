@@ -33,6 +33,7 @@
     <string name="courses">Services</string>
     <string name="contributor">Contributeur</string>
     <string name="quantity_optional">Quantité (facultatif)</string>
+    <string name="quantity">Quantité</string>
     <string name="unit_optional">Unité (optional)</string>
     <string name="course">Service</string>
     <string name="comment_optional">Commentaire (facultatif)</string>

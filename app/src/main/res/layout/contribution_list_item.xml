@@ -21,11 +21,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/ElevatedView"
     android:background="@drawable/shadow_item"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    android:padding="@dimen/large">
 
     <android.support.v7.widget.AppCompatImageView
         android:id="@+id/contribution_image_iv"
         style="@style/ContributionImageFood"
+        android:layout_gravity="top"
         android:contentDescription="@string/contribution_type_food" />
 
     <LinearLayout
@@ -34,46 +36,107 @@
         android:layout_weight="1"
         android:gravity="center_vertical"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingEnd="@dimen/normal"
+        android:paddingStart="@dimen/normal"
+        android:animateLayoutChanges="true">
 
         <TextView
             android:id="@+id/contribution_name_tv"
             style="@style/TextTitle"
             tools:text="Pizza" />
 
+        <TextView
+            android:id="@+id/contribution_contributor_tv"
+            style="@style/TextSecondary"
+            android:textColor="@color/colorPrimaryDark"
+            tools:text="Alex" />
+
         <LinearLayout
+            android:id="@+id/contribution_more_layout"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="center">
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/contribution_contributor_tv"
-                style="@style/TextSecondary"
-                android:textColor="@color/colorPrimaryDark"
-                tools:text="Alex" />
+            <LinearLayout
+                android:id="@+id/contribution_servings_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="start|center_vertical"
+                android:orientation="horizontal"
+                android:paddingTop="@dimen/normal">
 
-            <View
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+                <android.support.v7.widget.AppCompatImageView
+                    android:id="@+id/contribution_servings_iv"
+                    android:layout_width="@dimen/icon_default_size"
+                    android:layout_height="@dimen/icon_default_size"
+                    android:contentDescription="@string/servings"
+                    app:srcCompat="@drawable/ic_people_black_24dp" />
 
-            <TextView
-                android:id="@+id/contribution_servings_tv"
-                style="@style/TextSecondary"
-                android:paddingEnd="@dimen/small"
-                android:paddingStart="@dimen/small"
-                tools:text="42" />
+                <TextView
+                    android:id="@+id/contribution_servings_tv"
+                    style="@style/TextSecondary"
+                    android:paddingEnd="@dimen/small"
+                    android:paddingStart="@dimen/small"
+                    tools:text="42" />
 
-            <android.support.v7.widget.AppCompatImageView
-                android:id="@+id/contribution_servings_iv"
-                android:layout_width="@dimen/icon_default_size"
-                android:layout_height="@dimen/icon_default_size"
-                android:contentDescription="@string/servings"
-                app:srcCompat="@drawable/ic_people_black_24dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/contribution_quantity_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="start|center_vertical"
+                android:orientation="horizontal"
+                android:paddingTop="@dimen/normal">
+
+                <android.support.v7.widget.AppCompatImageView
+                    android:id="@+id/contribution_quantity_iv"
+                    android:layout_width="@dimen/icon_default_size"
+                    android:layout_height="@dimen/icon_default_size"
+                    android:contentDescription="@string/quantity"
+                    app:srcCompat="@drawable/ic_shopping_basket_black_24dp" />
+
+                <TextView
+                    android:id="@+id/contribution_quantity_tv"
+                    style="@style/TextSecondary"
+                    android:paddingEnd="@dimen/small"
+                    android:paddingStart="@dimen/small"
+                    tools:text="10 boxes" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/contribution_comment_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="start"
+                android:orientation="horizontal"
+                android:paddingTop="@dimen/normal">
+
+                <android.support.v7.widget.AppCompatImageView
+                    android:id="@+id/contribution_comment_iv"
+                    android:layout_width="@dimen/icon_default_size"
+                    android:layout_height="@dimen/icon_default_size"
+                    android:contentDescription="@string/quantity"
+                    app:srcCompat="@drawable/ic_insert_comment_black_24dp" />
+
+                <TextView
+                    android:id="@+id/contribution_comment_tv"
+                    style="@style/TextSecondary"
+                    android:paddingEnd="@dimen/small"
+                    android:paddingStart="@dimen/small"
+                    tools:text="I will take several types of pizzas so everybody can find what they want. I'll event take some for our vegan friens ;-)" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
-
     </LinearLayout>
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/contribution_more_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:srcCompat="@drawable/ic_keyboard_arrow_down_black_24dp" />
 
 </LinearLayout>

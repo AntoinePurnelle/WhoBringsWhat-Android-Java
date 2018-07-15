@@ -38,6 +38,7 @@
 
     <string name="contributor">Contributor</string>
     <string name="quantity_optional">Quantity (optional)</string>
+    <string name="quantity">Quantity</string>
     <string name="unit_optional">Unit (optional)</string>
     <string name="course">Course</string>
     <string name="comment_optional">Comment (optional)</string>

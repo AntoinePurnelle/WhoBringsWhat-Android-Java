@@ -18,8 +18,10 @@ package net.ouftech.whobringswhat.eventcontent;
 
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import net.ouftech.whobringswhat.R;
@@ -27,6 +29,7 @@ import net.ouftech.whobringswhat.model.Contribution;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class ContributionViewHolder extends RecyclerView.ViewHolder {
 
@@ -40,6 +43,22 @@ public class ContributionViewHolder extends RecyclerView.ViewHolder {
     AppCompatImageView servingsIv;
     @BindView(R.id.contribution_servings_tv)
     TextView servingsTv;
+    @BindView(R.id.contribution_more_button)
+    AppCompatImageView moreButton;
+    @BindView(R.id.contribution_servings_layout)
+    LinearLayout servingsLayout;
+    @BindView(R.id.contribution_quantity_tv)
+    TextView quantityTv;
+    @BindView(R.id.contribution_quantity_layout)
+    LinearLayout quantityLayout;
+    @BindView(R.id.contribution_comment_tv)
+    TextView commentTv;
+    @BindView(R.id.contribution_comment_layout)
+    LinearLayout commentLayout;
+    @BindView(R.id.contribution_more_layout)
+    LinearLayout moreLayout;
+
+    boolean expanded = false;
 
     public ContributionViewHolder(View itemView) {
         super(itemView);
@@ -50,15 +69,6 @@ public class ContributionViewHolder extends RecyclerView.ViewHolder {
         nameTv.setText(contribution.getName());
         servingsTv.setText(String.valueOf(contribution.getServings()));
 
-        if (contribution.getServings() > 0) {
-            servingsTv.setText(String.valueOf(contribution.getServings()));
-            servingsTv.setVisibility(View.VISIBLE);
-            servingsIv.setVisibility(View.VISIBLE);
-        } else {
-            servingsTv.setVisibility(View.GONE);
-            servingsIv.setVisibility(View.GONE);
-        }
-
         contributorTv.setText(contribution.getContributor());
 
         if (contribution.isDrink()) {
@@ -68,6 +78,63 @@ public class ContributionViewHolder extends RecyclerView.ViewHolder {
             imageIv.setImageResource(R.drawable.ic_local_dining_black_24dp);
             imageIv.setContentDescription(itemView.getContext().getString(R.string.contribution_type_food));
         }
+
+        if (contribution.getQuantity() <= 0 && contribution.getServings() <= 0 && TextUtils.isEmpty(contribution.getComment())) {
+            moreLayout.setVisibility(View.GONE);
+            moreButton.setVisibility(View.GONE);
+        } else {
+            if (expanded)
+                expand();
+            else
+                collapse();
+        }
+
+        if (contribution.getServings() > 0) {
+            servingsLayout.setVisibility(View.VISIBLE);
+            servingsTv.setText(String.valueOf(contribution.getServings()));
+        } else {
+            servingsLayout.setVisibility(View.GONE);
+            servingsTv.setText(null);
+        }
+
+        if (contribution.getQuantity() > 0) {
+            quantityLayout.setVisibility(View.VISIBLE);
+            String quantity = String.valueOf(contribution.getQuantity());
+            if (!TextUtils.isEmpty(contribution.getUnit()))
+                quantity = String.format("%s %s", quantity, contribution.getUnit());
+            quantityTv.setText(quantity);
+        } else {
+            quantityLayout.setVisibility(View.GONE);
+            quantityTv.setText(null);
+        }
+
+        if (!TextUtils.isEmpty(contribution.getComment())) {
+            commentLayout.setVisibility(View.VISIBLE);
+            commentTv.setText(contribution.getComment());
+        } else {
+            commentLayout.setVisibility(View.GONE);
+            commentTv.setText(null);
+        }
     }
 
+    @OnClick(R.id.contribution_more_button)
+    public void onMoreClicked() {
+        if (expanded) {
+            collapse();
+            expanded = false;
+        } else {
+            expand();
+            expanded = true;
+        }
+    }
+
+    private void expand() {
+        moreLayout.setVisibility(View.VISIBLE);
+        moreButton.setImageResource(R.drawable.ic_keyboard_arrow_up_black_24dp);
+    }
+
+    private void collapse() {
+        moreLayout.setVisibility(View.GONE);
+        moreButton.setImageResource(R.drawable.ic_keyboard_arrow_down_black_24dp);
+    }
 }
