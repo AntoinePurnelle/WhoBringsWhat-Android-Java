@@ -80,6 +80,9 @@ public class EventEditActivity extends BaseActivity {
     @State
     @StringRes
     private int titleRes;
+    @State
+    @StringRes
+    private int buttonRes;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,12 +95,12 @@ public class EventEditActivity extends BaseActivity {
                 // Init dates with existing event (it will be restored with the @State annotation if not first onCreate)
                 startDate = event.getTime();
                 endDate = event.getEndTime();
-                saveButton.setText(R.string.save_event);
+                buttonRes = R.string.save_event;
                 titleRes = R.string.edit_event;
             } else {
                 // No event in Intent --> new event
                 eventCreation = true;
-                saveButton.setText(R.string.create_event);
+                buttonRes = R.string.create_event;
                 titleRes = R.string.new_event;
             }
         }
@@ -118,6 +121,7 @@ public class EventEditActivity extends BaseActivity {
 
         if (getSupportActionBar() != null)
             getSupportActionBar().setTitle(titleRes);
+        saveButton.setText(buttonRes);
 
         startTimeEt.setOnFocusChangeListener((view, hasFocus) -> {
             if (hasFocus)
@@ -156,7 +160,8 @@ public class EventEditActivity extends BaseActivity {
 
     @OnClick(R.id.event_edit_end_time_et)
     public void onEndTimeEtClicked() {
-        showDateTimePicker(endDate, dateTime -> {
+        long initDate =  (endDate == 0 && startDate > 0) ? startDate : 0;
+        showDateTimePicker(initDate, dateTime -> {
             endDate = dateTime;
             displayDate(endDate, endTimeEt);
         });
@@ -368,6 +373,14 @@ public class EventEditActivity extends BaseActivity {
 
     public void setTitleRes(@StringRes int titleRes) {
         this.titleRes = titleRes;
+    }
+
+    public int getButtonRes() {
+        return buttonRes;
+    }
+
+    public void setButtonRes(int buttonRes) {
+        this.buttonRes = buttonRes;
     }
 
     private interface DateTimePickerListener {

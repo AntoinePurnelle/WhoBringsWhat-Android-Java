@@ -86,6 +86,9 @@ public class ContributionEditActivity extends BaseActivity {
     @State
     @StringRes
     private int titleRes;
+    @State
+    @StringRes
+    private int buttonRes;
 
     List<String> types;
     String courses[];
@@ -99,12 +102,12 @@ public class ContributionEditActivity extends BaseActivity {
             event = getIntent().getParcelableExtra(EVENT_EXTRA);
 
             if (contribution != null) { // First onCreate with an existing Contribution
-                saveButton.setText(R.string.save_contribution);
+                buttonRes = R.string.save_contribution;
                 titleRes = R.string.edit_contribution;
             } else {
                 // No event in Intent --> new event
                 contributionCreation = true;
-                saveButton.setText(R.string.create_contribution);
+                buttonRes = R.string.create_contribution;
                 titleRes = R.string.new_contribution;
             }
         }
@@ -143,6 +146,7 @@ public class ContributionEditActivity extends BaseActivity {
 
         if (getSupportActionBar() != null)
             getSupportActionBar().setTitle(titleRes);
+        saveButton.setText(buttonRes);
 
         courseEt.setOnFocusChangeListener((v, hasFocus) -> {
             if (hasFocus)
@@ -345,6 +349,14 @@ public class ContributionEditActivity extends BaseActivity {
 
     public void setTitleRes(int titleRes) {
         this.titleRes = titleRes;
+    }
+
+    public int getButtonRes() {
+        return buttonRes;
+    }
+
+    public void setButtonRes(int buttonRes) {
+        this.buttonRes = buttonRes;
     }
 
     @NonNull
