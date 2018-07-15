@@ -26,6 +26,8 @@
     <string name="to">to</string>
 
     <string name="name">Name</string>
+    <string name="name_event">Name of the event</string>
+    <string name="name_contribution">Name of the contribution</string>
     <string name="start_time">Start Time</string>
     <string name="end_time_optional">End Time (optional)</string>
     <string name="description_optional">Description (optional)</string>

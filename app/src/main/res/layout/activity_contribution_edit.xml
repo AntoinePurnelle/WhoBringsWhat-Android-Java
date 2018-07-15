@@ -40,7 +40,7 @@
                 <EditText
                     android:id="@+id/contribution_edit_name_et"
                     style="@style/ET"
-                    android:hint="@string/name"
+                    android:hint="@string/name_contribution"
                     tools:text="Homemade Pizza" />
             </android.support.design.widget.TextInputLayout>
 

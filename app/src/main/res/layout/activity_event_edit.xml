@@ -37,7 +37,7 @@
             <EditText
                 android:id="@+id/event_edit_name_et"
                 style="@style/ET"
-                android:hint="@string/name"
+                android:hint="@string/name_event"
                 tools:text="Nanodegree Party" />
         </android.support.design.widget.TextInputLayout>
 
