@@ -23,6 +23,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import io.fabric.sdk.android.services.concurrency.AsyncTask;
+
 public class FirestoreManager {
 
     public static final String USERS_COLLECTIONS_NAME = "users";
@@ -66,22 +68,30 @@ public class FirestoreManager {
      * @param listener Query listener used to return the fetched user
      */
     public static void fetchUserById(@NonNull String id, @NonNull UserQueryListener listener) {
-        db.collection(USERS_COLLECTIONS_NAME)
-                .document(id)
-                .get()
-                .addOnCompleteListener(userTask -> {
-                    if (userTask.isSuccessful()) {
-                        DocumentSnapshot userDocumentSnapshot = userTask.getResult();
-                        User user = User.fromDocument(userDocumentSnapshot);
+        new AsyncTask<Void, Void, Void>() {
 
-                        listener.onSuccess(user);
+            @Override
+            protected Void doInBackground(Void... voids) {
+                db.collection(USERS_COLLECTIONS_NAME)
+                        .document(id)
 
-                    } else {
-                        Logger.w(getLogTag(), "Error getting user document: ", userTask.getException());
-                        listener.onFailure(userTask.getException());
-                    }
-                })
-                .addOnFailureListener(listener::onFailure);
+                        .get()
+                        .addOnCompleteListener(userTask -> {
+                            if (userTask.isSuccessful()) {
+                                DocumentSnapshot userDocumentSnapshot = userTask.getResult();
+                                User user = User.fromDocument(userDocumentSnapshot);
+
+                                listener.onSuccess(user);
+
+                            } else {
+                                Logger.w(getLogTag(), "Error getting user document: ", userTask.getException());
+                                listener.onFailure(userTask.getException());
+                            }
+                        })
+                        .addOnFailureListener(listener::onFailure);
+                return null;
+            }
+        }.execute();
     }
 
     /**
@@ -93,48 +103,54 @@ public class FirestoreManager {
      */
     public static void initWithFirebaseUser(@NonNull FirebaseUser firebaseUser, UserQueryListener userQueryListener, boolean update) {
         Logger.d(getLogTag(), String.format("Initializing with FirebaseUser %s", firebaseUser.getUid()));
+        new AsyncTask<Void, Void, Void>() {
 
-        // Try to fetch the user
-        db.collection(USERS_COLLECTIONS_NAME)
-                .document(firebaseUser.getUid())
-                .get()
-                .addOnCompleteListener(userTask -> {
-                    if (userTask.isSuccessful()) {
-                        DocumentSnapshot userDocumentSnapshot = userTask.getResult();
+            @Override
+            protected Void doInBackground(Void... voids) {
+                // Try to fetch the user
+                db.collection(USERS_COLLECTIONS_NAME)
+                        .document(firebaseUser.getUid())
+                        .get()
+                        .addOnCompleteListener(userTask -> {
+                            if (userTask.isSuccessful()) {
+                                DocumentSnapshot userDocumentSnapshot = userTask.getResult();
 
-                        if (!update && userDocumentSnapshot.exists()) {
-                            // If user from Firebase exists, save it
-                            currentUser = User.fromDocument(userDocumentSnapshot);
-                            Logger.d(getLogTag(), String.format("User fetched: %s", currentUser));
-                            userQueryListener.onSuccess(currentUser);
-                        } else {
-                            // If user doesn't exist, create it
-                            User user = User.fromFirebaseUser(firebaseUser);
-                            saveUser(user, new SimpleQueryListener() {
-                                @Override
-                                public void onSuccess(Void aVoid) {
-                                    currentUser = user;
-                                    Logger.d(getLogTag(), String.format("User created: %s", user));
+                                if (!update && userDocumentSnapshot.exists()) {
+                                    // If user from Firebase exists, save it
+                                    currentUser = User.fromDocument(userDocumentSnapshot);
+                                    Logger.d(getLogTag(), String.format("User fetched: %s", currentUser));
                                     userQueryListener.onSuccess(currentUser);
+                                } else {
+                                    // If user doesn't exist, create it
+                                    User user = User.fromFirebaseUser(firebaseUser);
+                                    saveUser(user, new SimpleQueryListener() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            currentUser = user;
+                                            Logger.d(getLogTag(), String.format("User created: %s", user));
+                                            userQueryListener.onSuccess(currentUser);
+                                        }
+
+                                        @Override
+                                        public void onFailure(Exception e) {
+                                            Logger.w(getLogTag(), "Error creating the User on Firestore", e, false);
+                                            userQueryListener.onFailure(e);
+                                        }
+                                    });
                                 }
 
-                                @Override
-                                public void onFailure(Exception e) {
-                                    Logger.w(getLogTag(), "Error creating the User on Firestore", e, false);
-                                    userQueryListener.onFailure(e);
-                                }
-                            });
-                        }
-
-                    } else {
-                        Logger.w(getLogTag(), "Error getting user document: ", userTask.getException(), false);
-                        userQueryListener.onFailure(userTask.getException());
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Logger.w(getLogTag(), "Error getting user document: ", e, false);
-                    userQueryListener.onFailure(e);
-                });
+                            } else {
+                                Logger.w(getLogTag(), "Error getting user document: ", userTask.getException(), false);
+                                userQueryListener.onFailure(userTask.getException());
+                            }
+                        })
+                        .addOnFailureListener(e -> {
+                            Logger.w(getLogTag(), "Error getting user document: ", e, false);
+                            userQueryListener.onFailure(e);
+                        });
+                return null;
+            }
+        }.execute();
     }
 
     /**
@@ -146,10 +162,17 @@ public class FirestoreManager {
      * @param listener Query Listener for success and failure callbacks
      */
     public static void saveUser(@NonNull User user, @NonNull SimpleQueryListener listener) {
-        db.collection(USERS_COLLECTIONS_NAME).document(user.getFirebaseId())
-                .set(user)
-                .addOnSuccessListener(listener::onSuccess)
-                .addOnFailureListener(listener::onFailure);
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                db.collection(USERS_COLLECTIONS_NAME).document(user.getFirebaseId())
+                        .set(user)
+                        .addOnSuccessListener(listener::onSuccess)
+                        .addOnFailureListener(listener::onFailure);
+                return null;
+            }
+        }.execute();
     }
 
     public static void logout() {
@@ -182,22 +205,29 @@ public class FirestoreManager {
      * @param listener Query Listener for success and failure callbacks
      */
     public static void fetchEventById(@NonNull String id, @NonNull EventQueryListener listener) {
-        db.collection(EVENTS_COLLECTIONS_NAME)
-                .document(id)
-                .get()
-                .addOnCompleteListener(task -> {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot documentSnapshot = task.getResult();
+        new AsyncTask<Void, Void, Void>() {
 
-                        Event event = Event.fromDocument(documentSnapshot);
-                        listener.onSuccess(event);
+            @Override
+            protected Void doInBackground(Void... voids) {
+                db.collection(EVENTS_COLLECTIONS_NAME)
+                        .document(id)
+                        .get()
+                        .addOnCompleteListener(task -> {
+                            if (task.isSuccessful()) {
+                                DocumentSnapshot documentSnapshot = task.getResult();
 
-                    } else {
-                        Logger.w(getLogTag(), "Error getting event document: ", task.getException());
-                        listener.onFailure(task.getException());
-                    }
-                })
-                .addOnFailureListener(listener::onFailure);
+                                Event event = Event.fromDocument(documentSnapshot);
+                                listener.onSuccess(event);
+
+                            } else {
+                                Logger.w(getLogTag(), "Error getting event document: ", task.getException());
+                                listener.onFailure(task.getException());
+                            }
+                        })
+                        .addOnFailureListener(listener::onFailure);
+                return null;
+            }
+        }.execute();
     }
 
     /**
@@ -213,28 +243,35 @@ public class FirestoreManager {
         The event has a map for which the keys are the user ids and the values are the event start date.
         See https://firebase.google.com/docs/firestore/solutions/arrays
          */
-        db.collection(EVENTS_COLLECTIONS_NAME)
-                .whereGreaterThan(Event.USERS_FIELD + "." + userId, 0)
-                .orderBy(Event.USERS_FIELD + "." + userId)
-                .get()
-                .addOnCompleteListener(eventsTask -> {
-                    if (eventsTask.isSuccessful()) {
-                        QuerySnapshot eventsQuerySnapshot = eventsTask.getResult();
-                        List<Event> eventList = new ArrayList<>();
+        new AsyncTask<Void, Void, Void>() {
 
-                        for (DocumentSnapshot eventsDocumentSnapshot : eventsQuerySnapshot) {
-                            Event event = Event.fromDocument(eventsDocumentSnapshot);
-                            eventList.add(event);
-                        }
+            @Override
+            protected Void doInBackground(Void... voids) {
+                db.collection(EVENTS_COLLECTIONS_NAME)
+                        .whereGreaterThan(Event.USERS_FIELD + "." + userId, 0)
+                        .orderBy(Event.USERS_FIELD + "." + userId)
+                        .get()
+                        .addOnCompleteListener(eventsTask -> {
+                            if (eventsTask.isSuccessful()) {
+                                QuerySnapshot eventsQuerySnapshot = eventsTask.getResult();
+                                List<Event> eventList = new ArrayList<>();
 
-                        listener.onSuccess(eventList);
-                    } else {
-                        Logger.w(getLogTag(), "Error getting events documents: ", eventsTask.getException());
-                        listener.onFailure(eventsTask.getException());
-                    }
+                                for (DocumentSnapshot eventsDocumentSnapshot : eventsQuerySnapshot) {
+                                    Event event = Event.fromDocument(eventsDocumentSnapshot);
+                                    eventList.add(event);
+                                }
 
-                })
-                .addOnFailureListener(listener::onFailure);
+                                listener.onSuccess(eventList);
+                            } else {
+                                Logger.w(getLogTag(), "Error getting events documents: ", eventsTask.getException());
+                                listener.onFailure(eventsTask.getException());
+                            }
+
+                        })
+                        .addOnFailureListener(listener::onFailure);
+                return null;
+            }
+        }.execute();
     }
 
     /**
@@ -257,17 +294,24 @@ public class FirestoreManager {
      * @param listener Query Listener for success and failure callbacks
      */
     public static void addEvent(@NonNull Event event, @NonNull SimpleQueryListener listener) {
-        DocumentReference documentReference = db.collection(EVENTS_COLLECTIONS_NAME).document();
-        event.setId(documentReference.getId());
-        event.setOwner(db.collection(USERS_COLLECTIONS_NAME).document(currentUser.getFirebaseId()));
-        HashMap<String, Long> users = new HashMap<>();
-        users.put(currentUser.getFirebaseId(), event.getTime());
-        event.setUsers(users);
+        new AsyncTask<Void, Void, Void>() {
 
-        documentReference
-                .set(event)
-                .addOnSuccessListener(listener::onSuccess)
-                .addOnFailureListener(listener::onFailure);
+            @Override
+            protected Void doInBackground(Void... voids) {
+                DocumentReference documentReference = db.collection(EVENTS_COLLECTIONS_NAME).document();
+                event.setId(documentReference.getId());
+                event.setOwner(db.collection(USERS_COLLECTIONS_NAME).document(currentUser.getFirebaseId()));
+                HashMap<String, Long> users = new HashMap<>();
+                users.put(currentUser.getFirebaseId(), event.getTime());
+                event.setUsers(users);
+
+                documentReference
+                        .set(event)
+                        .addOnSuccessListener(listener::onSuccess)
+                        .addOnFailureListener(listener::onFailure);
+                return null;
+            }
+        }.execute();
     }
 
     /**
@@ -279,12 +323,19 @@ public class FirestoreManager {
      * @param listener Query Listener for success and failure callbacks
      */
     public static void updateEvent(@NonNull Event event, @NonNull SimpleQueryListener listener) {
-        DocumentReference documentReference = db.collection(EVENTS_COLLECTIONS_NAME).document(event.getId());
+        new AsyncTask<Void, Void, Void>() {
 
-        documentReference
-                .set(event)
-                .addOnSuccessListener(listener::onSuccess)
-                .addOnFailureListener(listener::onFailure);
+            @Override
+            protected Void doInBackground(Void... voids) {
+                DocumentReference documentReference = db.collection(EVENTS_COLLECTIONS_NAME).document(event.getId());
+
+                documentReference
+                        .set(event)
+                        .addOnSuccessListener(listener::onSuccess)
+                        .addOnFailureListener(listener::onFailure);
+                return null;
+            }
+        }.execute();
     }
 
 
@@ -296,12 +347,19 @@ public class FirestoreManager {
      * @param listener Query Listener for success and failure callbacks
      */
     public static void deleteEvent(@NonNull Event event, @NonNull SimpleQueryListener listener) {
-        DocumentReference documentReference = db.collection(EVENTS_COLLECTIONS_NAME).document(event.getId());
+        new AsyncTask<Void, Void, Void>() {
 
-        documentReference
-                .delete()
-                .addOnSuccessListener(listener::onSuccess)
-                .addOnFailureListener(listener::onFailure);
+            @Override
+            protected Void doInBackground(Void... voids) {
+                DocumentReference documentReference = db.collection(EVENTS_COLLECTIONS_NAME).document(event.getId());
+
+                documentReference
+                        .delete()
+                        .addOnSuccessListener(listener::onSuccess)
+                        .addOnFailureListener(listener::onFailure);
+                return null;
+            }
+        }.execute();
     }
 
     public static void getEventLink(@NonNull Event event, @NonNull OnCompleteListener<ShortDynamicLink> listener) {
@@ -341,27 +399,34 @@ public class FirestoreManager {
      */
     public static void fetchContributionsForEvent(@NonNull Event event, @NonNull ContributionsQueryListener listener) {
         // fetch the /events/[EVENT_ID]/contributions collection
-        db.collection(EVENTS_COLLECTIONS_NAME + "/" + event.getId() + "/" + CONTRIBUTIONS_COLLECTIONS_NAME)
-                .orderBy("isDrink")
-                .orderBy("name")
-                .get()
-                .addOnCompleteListener(contributionsTask -> {
-                    if (contributionsTask.isSuccessful()) {
-                        QuerySnapshot contributionsQuerySnapshot = contributionsTask.getResult();
-                        List<Contribution> contributionsList = new ArrayList<>();
+        new AsyncTask<Void, Void, Void>() {
 
-                        for (DocumentSnapshot contributionsDocumentSnapshot : contributionsQuerySnapshot) {
-                            Contribution contribution = Contribution.fromDocument(contributionsDocumentSnapshot);
-                            contributionsList.add(contribution);
-                        }
-                        listener.onSuccess(contributionsList);
-                    } else {
-                        Logger.w(getLogTag(), "Error getting contributions documents: ", contributionsTask.getException());
-                        listener.onFailure(contributionsTask.getException());
-                    }
+            @Override
+            protected Void doInBackground(Void... voids) {
+                db.collection(EVENTS_COLLECTIONS_NAME + "/" + event.getId() + "/" + CONTRIBUTIONS_COLLECTIONS_NAME)
+                        .orderBy("isDrink")
+                        .orderBy("name")
+                        .get()
+                        .addOnCompleteListener(contributionsTask -> {
+                            if (contributionsTask.isSuccessful()) {
+                                QuerySnapshot contributionsQuerySnapshot = contributionsTask.getResult();
+                                List<Contribution> contributionsList = new ArrayList<>();
 
-                })
-                .addOnFailureListener(listener::onFailure);
+                                for (DocumentSnapshot contributionsDocumentSnapshot : contributionsQuerySnapshot) {
+                                    Contribution contribution = Contribution.fromDocument(contributionsDocumentSnapshot);
+                                    contributionsList.add(contribution);
+                                }
+                                listener.onSuccess(contributionsList);
+                            } else {
+                                Logger.w(getLogTag(), "Error getting contributions documents: ", contributionsTask.getException());
+                                listener.onFailure(contributionsTask.getException());
+                            }
+
+                        })
+                        .addOnFailureListener(listener::onFailure);
+                return null;
+            }
+        }.execute();
     }
 
     /**
@@ -374,16 +439,23 @@ public class FirestoreManager {
      * @param listener     Query Listener for success and failure callbacks
      */
     public static void addContribution(@NonNull Event event, @NonNull Contribution contribution, @NonNull SimpleQueryListener listener) {
-        DocumentReference documentReference = db
-                .collection(EVENTS_COLLECTIONS_NAME).document(event.getId())
-                .collection(CONTRIBUTIONS_COLLECTIONS_NAME).document();
-        contribution.setId(documentReference.getId());
-        contribution.setUser(db.collection(USERS_COLLECTIONS_NAME).document(currentUser.getFirebaseId()));
+        new AsyncTask<Void, Void, Void>() {
 
-        documentReference
-                .set(contribution)
-                .addOnSuccessListener(listener::onSuccess)
-                .addOnFailureListener(listener::onFailure);
+            @Override
+            protected Void doInBackground(Void... voids) {
+                DocumentReference documentReference = db
+                        .collection(EVENTS_COLLECTIONS_NAME).document(event.getId())
+                        .collection(CONTRIBUTIONS_COLLECTIONS_NAME).document();
+                contribution.setId(documentReference.getId());
+                contribution.setUser(db.collection(USERS_COLLECTIONS_NAME).document(currentUser.getFirebaseId()));
+
+                documentReference
+                        .set(contribution)
+                        .addOnSuccessListener(listener::onSuccess)
+                        .addOnFailureListener(listener::onFailure);
+                return null;
+            }
+        }.execute();
     }
 
     /**
@@ -396,14 +468,21 @@ public class FirestoreManager {
      * @param listener     Query Listener for success and failure callbacks
      */
     public static void updateContribution(@NonNull Event event, @NonNull Contribution contribution, @NonNull SimpleQueryListener listener) {
-        DocumentReference documentReference = db
-                .collection(EVENTS_COLLECTIONS_NAME).document(event.getId())
-                .collection(CONTRIBUTIONS_COLLECTIONS_NAME).document(contribution.getId());
+        new AsyncTask<Void, Void, Void>() {
 
-        documentReference
-                .set(contribution)
-                .addOnSuccessListener(listener::onSuccess)
-                .addOnFailureListener(listener::onFailure);
+            @Override
+            protected Void doInBackground(Void... voids) {
+                DocumentReference documentReference = db
+                        .collection(EVENTS_COLLECTIONS_NAME).document(event.getId())
+                        .collection(CONTRIBUTIONS_COLLECTIONS_NAME).document(contribution.getId());
+
+                documentReference
+                        .set(contribution)
+                        .addOnSuccessListener(listener::onSuccess)
+                        .addOnFailureListener(listener::onFailure);
+                return null;
+            }
+        }.execute();
     }
 
 
@@ -416,14 +495,21 @@ public class FirestoreManager {
      * @param listener     Query Listener for success and failure callbacks
      */
     public static void deleteContribution(@NonNull Event event, @NonNull Contribution contribution, @NonNull SimpleQueryListener listener) {
-        DocumentReference documentReference = db
-                .collection(EVENTS_COLLECTIONS_NAME).document(event.getId())
-                .collection(CONTRIBUTIONS_COLLECTIONS_NAME).document(contribution.getId());
+        new AsyncTask<Void, Void, Void>() {
 
-        documentReference
-                .delete()
-                .addOnSuccessListener(listener::onSuccess)
-                .addOnFailureListener(listener::onFailure);
+            @Override
+            protected Void doInBackground(Void... voids) {
+                DocumentReference documentReference = db
+                        .collection(EVENTS_COLLECTIONS_NAME).document(event.getId())
+                        .collection(CONTRIBUTIONS_COLLECTIONS_NAME).document(contribution.getId());
+
+                documentReference
+                        .delete()
+                        .addOnSuccessListener(listener::onSuccess)
+                        .addOnFailureListener(listener::onFailure);
+                return null;
+            }
+        }.execute();
     }
 
     // endregion Contributions
