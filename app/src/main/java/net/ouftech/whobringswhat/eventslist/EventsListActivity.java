@@ -47,6 +47,7 @@ import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import net.ouftech.whobringswhat.EventEditActivity;
 import net.ouftech.whobringswhat.R;
 import net.ouftech.whobringswhat.commons.BaseActivity;
+import net.ouftech.whobringswhat.commons.CollectionUtils;
 import net.ouftech.whobringswhat.commons.Logger;
 import net.ouftech.whobringswhat.eventcontent.EventContentActivity;
 import net.ouftech.whobringswhat.model.Event;
@@ -359,21 +360,32 @@ public class EventsListActivity extends BaseActivity {
 
     private void saveUpcomingEventsList(List<Event> upcomingEvents) {
         if (isRunning()) {
-            StringBuilder upComingEventsString = new StringBuilder();
+            String events;
 
-            for (Event upcomingEvent : upcomingEvents) {
-                upComingEventsString
-                        .append("• ")
-                        .append(upcomingEvent.getName());
-                if (upcomingEvent.getTime() > 0)
+            if (CollectionUtils.isEmpty(upcomingEvents)) {
+                events = null;
+            } else {
+
+                StringBuilder upComingEventsString = new StringBuilder();
+
+                upComingEventsString.append(getString(R.string.upcoming)).append("\n\n");
+
+                for (Event upcomingEvent : upcomingEvents) {
                     upComingEventsString
-                            .append(" - ")
-                            .append(DateUtils.formatDateTime(this, upcomingEvent.getTime(), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NUMERIC_DATE | DateUtils.FORMAT_SHOW_TIME))
-                            .append("\n");
+                            .append("• ")
+                            .append(upcomingEvent.getName());
+                    if (upcomingEvent.getTime() > 0)
+                        upComingEventsString
+                                .append(" - ")
+                                .append(DateUtils.formatDateTime(this, upcomingEvent.getTime(), DateUtils.FORMAT_SHOW_DATE | DateUtils.FORMAT_NUMERIC_DATE | DateUtils.FORMAT_SHOW_TIME))
+                                .append("\n");
+                }
+
+                events = upComingEventsString.toString();
             }
 
             SharedPreferences.Editor editor = getApplication().getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE).edit();
-            editor.putString(UPCOMING_EVENTS_SHARED_PREF, upComingEventsString.toString());
+            editor.putString(UPCOMING_EVENTS_SHARED_PREF, events);
             editor.apply();
         }
     }

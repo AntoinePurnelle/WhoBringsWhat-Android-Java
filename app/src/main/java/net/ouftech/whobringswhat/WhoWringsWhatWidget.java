@@ -16,9 +16,11 @@
 
 package net.ouftech.whobringswhat;
 
+import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.Context;
+import android.content.Intent;
 import android.widget.RemoteViews;
 
 import net.ouftech.whobringswhat.eventslist.EventsListActivity;
@@ -31,11 +33,13 @@ public class WhoWringsWhatWidget extends AppWidgetProvider {
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
 
-        CharSequence widgetText = context.getString(R.string.appwidget_text);
         // Construct the RemoteViews object
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.who_wrings_what_widget);
         String events = context.getSharedPreferences(EventsListActivity.SHARED_PREFS_NAME, Context.MODE_PRIVATE).getString(EventsListActivity.UPCOMING_EVENTS_SHARED_PREF, context.getString(R.string.widget_events_list_empty_message));
-        views.setTextViewText(R.id.appwidget_text, events );
+        views.setTextViewText(R.id.appwidget_text, events);
+        Intent intent = new Intent(context, EventsListActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+        views.setOnClickPendingIntent(R.id.appwidget_layout, pendingIntent);
 
         // Instruct the widget manager to update the widget
         appWidgetManager.updateAppWidget(appWidgetId, views);
