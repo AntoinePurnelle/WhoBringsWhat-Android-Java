@@ -11,7 +11,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import net.ouftech.whobringswhat.commons.CollectionUtils;
 import net.ouftech.whobringswhat.commons.Logger;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import io.fabric.sdk.android.services.concurrency.AsyncTask;
 
@@ -54,7 +59,7 @@ public class RealTimeDBManager {
                         if (dataSnapshot.exists()) {
                             // User exists and update not necessary
                             for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                                listener.onSuccess(currentUser);
+                                listener.onSuccess(snapshot.getValue(User.class));
                                 return;
                             }
                         } else {
@@ -87,7 +92,6 @@ public class RealTimeDBManager {
             @Override
             protected Void doInBackground(Void... voids) {
 
-
                 usersRef.orderByChild(User.FIREBASE_ID_FIELD).equalTo(firebaseUser.getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -96,6 +100,7 @@ public class RealTimeDBManager {
                             for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                                 // do something with the individual "issues"
                                 currentUser = snapshot.getValue(User.class);
+                                userId = snapshot.getKey();
 
                                 if (!update) {
                                     // Simply query. No update needed --> success
@@ -165,6 +170,151 @@ public class RealTimeDBManager {
     }
 
     // endregion Users
+
+
+    // region Events
+
+    /**
+     * Fetches a {@link Event} item from Firestore using its id<br/>
+     *
+     * @param id       id of the {@link Event} document to fetch
+     * @param listener Query Listener for success and failure callbacks
+     */
+    public static void fetchEventById(@NonNull String id, @NonNull FirestoreManager.EventQueryListener listener) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                eventsRef.child(id).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists())
+                            listener.onSuccess(dataSnapshot.getValue(Event.class));
+                        else
+                            listener.onFailure(new NullPointerException(String.format("Event %s could not be found", id)));
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        Logger.w(getLogTag(), "Error getting Event document: ", databaseError.toException(), false);
+                        listener.onFailure(databaseError.toException());
+                    }
+                });
+                return null;
+            }
+        }.execute();
+    }
+
+    /**
+     * Fetches the list of events for the given {@link User} object.<br/>
+     * Events are ordered by start date ({@link Event#time})
+     *
+     * @param user     {@link User} object from which to get the events
+     * @param listener Query Listener for success and failure callbacks
+     */
+    public static void fetchEventsForUser(@NonNull User user, @NonNull FirestoreManager.EventsQueryListener listener) {
+        new AsyncTask<Void, Void, Void>() {
+
+            List<Event> events = new ArrayList<>();
+            List<String> eventIds = user.getEvents();
+            int eventsFetched = 0;
+            int totalEvents;
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+
+                if (CollectionUtils.isEmpty(eventIds)) {
+                    Logger.d(getLogTag(), "User doesn't have any event");
+                    listener.onSuccess(events);
+                } else {
+                    totalEvents = eventIds.size();
+                    for (String eventId : eventIds) {
+                        eventsRef.child(eventId).addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                addEvent(dataSnapshot.getValue(Event.class));
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                                Logger.w(getLogTag(), "Error getting Event document: ", databaseError.toException(), false);
+                                addEvent(null);
+                            }
+                        });
+                    }
+                }
+                return null;
+            }
+
+            private synchronized void addEvent(Event event) {
+                if (event != null)
+                    events.add(event);
+
+                eventsFetched++;
+
+                if (eventsFetched == totalEvents) {
+                    Collections.sort(events);
+                    listener.onSuccess(events);
+                }
+            }
+        }.execute();
+    }
+
+    /**
+     * Fetches the list of events for the currently logged in user {@link User} object.<br/>
+     * Events are ordered by start date ({@link Event#time})
+     *
+     * @param listener Query Listener for success and failure callbacks
+     */
+    public static void fetchEventsForCurrentUser(@NonNull FirestoreManager.EventsQueryListener listener) {
+        if (currentUser != null)
+            fetchEventsForUser(currentUser, listener);
+        else
+            listener.onFailure(new IllegalStateException("No logged in user"));
+    }
+
+    /**
+     * Creates a {@link Event} document on Firestore.<br/>
+     *
+     * @param event    {@link Event} to save as a Firestore document
+     * @param listener Query Listener for success and failure callbacks
+     */
+    public static void addEvent(@NonNull Event event, @NonNull FirestoreManager.SimpleQueryListener listener) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                String eventId = eventsRef.push().getKey();
+                eventsRef.child(eventId).setValue(event)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Logger.d(getLogTag(), String.format("Event %s created", event));
+                                listener.onSuccess(aVoid);
+                                currentUser.addEvent(eventId);
+                                saveUser(currentUser, new FirestoreManager.UserQueryListener() {
+                                    @Override
+                                    public void onSuccess(@NonNull User user) {
+                                        Logger.d(getLogTag(), String.format("Event %s added to user %s", event, userId));
+                                    }
+
+                                    @Override
+                                    public void onFailure(Exception e) {
+                                        Logger.w(getLogTag(), String.format("Error while adding event %s to user %s", event, userId), e);
+                                    }
+                                });
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                listener.onFailure(e);
+                            }
+                        });
+                return null;
+            }
+        }.execute();
+    }
+
+    // endregion Events
 
 
     @NonNull

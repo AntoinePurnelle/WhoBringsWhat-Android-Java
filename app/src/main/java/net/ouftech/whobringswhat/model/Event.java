@@ -29,7 +29,7 @@ import com.google.firebase.firestore.PropertyName;
 
 import java.util.HashMap;
 
-public class Event implements Parcelable {
+public class Event implements Parcelable, Comparable<Event> {
 
     public static final String USERS_FIELD = "users";
 
@@ -300,4 +300,13 @@ public class Event implements Parcelable {
             return new Event[size];
         }
     };
+
+    @Override
+    public int compareTo(@NonNull Event o) {
+
+        long compareDate = o.getTime();
+
+        //ascending order
+        return (int) (this.time - compareDate);
+    }
 }

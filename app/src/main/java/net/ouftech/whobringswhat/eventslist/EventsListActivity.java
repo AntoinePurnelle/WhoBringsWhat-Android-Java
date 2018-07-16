@@ -326,13 +326,37 @@ public class EventsListActivity extends BaseActivity {
             @Override
             public void onSuccess(@NonNull User user) {
                 Logger.d(getLogTag(), "RealtimeDB login finished");
+
+                RealTimeDBManager.fetchEventsForUser(user, new FirestoreManager.EventsQueryListener() {
+                    @Override
+                    public void onSuccess(@NonNull List<Event> events) {
+                        Logger.d(getLogTag(), String.format("Fetched %s events", events.size()));
+                        long now = new Date().getTime();
+                        List<Event> pastEvents = new ArrayList<>();
+                        List<Event> upcomingEvents = new ArrayList<>();
+                        for (Event event : events) {
+                            if (event.getTime() < now)
+                                pastEvents.add(event);
+                            else
+                                upcomingEvents.add(event);
+                        }
+
+                        displayEvents(pastEvents, upcomingEvents);
+                        saveUpcomingEventsList(upcomingEvents);
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        Logger.e(getLogTag(), String.format("Error while fetching events for user %s", firebaseUser.getUid()), e);
+                    }
+                });
             }
 
             @Override
             public void onFailure(Exception e) {
                 Logger.e(getLogTag(), String.format("Error while fetching or creating user %s", firebaseUser.getUid()), e);
             }
-        }, true);
+        }, transformAnonymous);
 
         FirestoreManager.initWithFirebaseUser(firebaseUser, new FirestoreManager.UserQueryListener() {
             @Override
@@ -348,7 +372,8 @@ public class EventsListActivity extends BaseActivity {
         transformAnonymous = false;
 
 
-        FirestoreManager.fetchEventsForUser(firebaseUser.getUid(), new FirestoreManager.EventsQueryListener() {
+
+        /*FirestoreManager.fetchEventsForUser(firebaseUser.getUid(), new FirestoreManager.EventsQueryListener() {
             @Override
             public void onSuccess(@NonNull List<Event> events) {
                 Logger.d(getLogTag(), String.format("Fetched %s events", events.size()));
@@ -370,7 +395,7 @@ public class EventsListActivity extends BaseActivity {
             public void onFailure(Exception e) {
                 Logger.e(getLogTag(), String.format("Error while fetching events for user %s", firebaseUser.getUid()), e);
             }
-        });
+        });*/
     }
 
     private void saveUpcomingEventsList(List<Event> upcomingEvents) {

@@ -37,6 +37,7 @@ import net.ouftech.whobringswhat.commons.Logger;
 import net.ouftech.whobringswhat.eventcontent.EventContentActivity;
 import net.ouftech.whobringswhat.model.Event;
 import net.ouftech.whobringswhat.model.FirestoreManager;
+import net.ouftech.whobringswhat.model.RealTimeDBManager;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -239,7 +240,7 @@ public class EventEditActivity extends BaseActivity {
     private void saveEvent() {
         if (eventCreation) {
             Logger.d(getLogTag(), String.format("Creating event %s", event));
-            FirestoreManager.addEvent(event, new FirestoreManager.SimpleQueryListener() {
+            RealTimeDBManager.addEvent(event, new FirestoreManager.SimpleQueryListener() {
                 @Override
                 public void onSuccess(Void aVoid) {
                     Logger.d(getLogTag(), "Event created");
@@ -252,6 +253,20 @@ public class EventEditActivity extends BaseActivity {
                     showWarning(R.string.an_error_occurred);
                 }
             });
+
+            /*FirestoreManager.addEvent(event, new FirestoreManager.SimpleQueryListener() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Logger.d(getLogTag(), "Event created");
+                    Toast.makeText(EventEditActivity.this, R.string.event_created, Toast.LENGTH_LONG).show();
+                    startEventContentActivity();
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    showWarning(R.string.an_error_occurred);
+                }
+            });*/
         } else {
             Logger.d(getLogTag(), String.format("Updating event %s", event));
             FirestoreManager.updateEvent(event, new FirestoreManager.SimpleQueryListener() {
