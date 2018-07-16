@@ -21,20 +21,36 @@ import android.support.annotation.NonNull;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 
-public class User {
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+public class User extends BaseModel {
 
     public static final String EMAIL_ADDRESS_FIELD = "emailAddress";
+    public static final String FIREBASE_ID_FIELD = "firebaseId";
 
     private String emailAddress;
     private String name;
     private String firebaseId;
+    private List<String> events;
 
-    public User(){}
+    public User(){
+        super();
+    }
 
-    public User(String name, String emailAddress, String firebaseId) {
+    public User(String name, String emailAddress, String firebaseId, long creationDate) {
+        this(name, emailAddress, firebaseId, creationDate, new ArrayList<>());
+    }
+
+    public User(String name, String emailAddress, String firebaseId, long creationDate, List<String> events) {
         this.name = name;
         this.emailAddress = emailAddress;
         this.firebaseId = firebaseId;
+        this.creationDate = creationDate;
+        if (events == null)
+            events = new ArrayList<>();
+        this.events = events;
     }
 
     public static User fromDocument(@NonNull DocumentSnapshot documentSnapshot) {
@@ -42,7 +58,7 @@ public class User {
     }
 
     public static User fromFirebaseUser(@NonNull FirebaseUser firebaseUser) {
-       return new User(firebaseUser.getDisplayName(), firebaseUser.getEmail(), firebaseUser.getUid());
+       return new User(firebaseUser.getDisplayName(), firebaseUser.getEmail(), firebaseUser.getUid(), firebaseUser.getMetadata().getCreationTimestamp());
     }
 
     public String getName() {
@@ -69,12 +85,34 @@ public class User {
         this.firebaseId = firebaseId;
     }
 
+    public List<String> getEvents() {
+        return events;
+    }
+
+    public void setEvents(List<String> events) {
+        this.events = events;
+    }
+
+    public void addEvent(@NonNull Event event) {
+        addEvent(event.getId());
+    }
+
+    public void addEvent(@NonNull String eventId) {
+        if (events == null)
+            events = new ArrayList<>();
+
+        if (!events.contains(eventId))
+            events.add(eventId);
+    }
+
     @Override
     public String toString() {
         return "User{" +
                 "\n emailAddress='" + emailAddress + '\'' +
                 ",\n name='" + name + '\'' +
                 ",\n firebaseId='" + firebaseId + '\'' +
+                ",\n creationDate='" + creationDate + '\'' +
+                ",\n events='" + (events != null ? Arrays.toString(events.toArray()) : "null") + '\'' +
                 "\n}";
     }
 }

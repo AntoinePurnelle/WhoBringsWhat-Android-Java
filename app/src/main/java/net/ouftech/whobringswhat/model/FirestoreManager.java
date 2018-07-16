@@ -74,7 +74,6 @@ public class FirestoreManager {
             protected Void doInBackground(Void... voids) {
                 db.collection(USERS_COLLECTIONS_NAME)
                         .document(id)
-
                         .get()
                         .addOnCompleteListener(userTask -> {
                             if (userTask.isSuccessful()) {
@@ -555,7 +554,7 @@ public class FirestoreManager {
     }
 
     public static void testAddUser() {
-        User user = new User("User2", "apu+user2@ouftech.net", "2222");
+        User user = new User("User2", "apu+user2@ouftech.net", "2222", new Date().getTime());
         saveUser(user, new SimpleQueryListener() {
             @Override
             public void onSuccess(Void aVoid) {

@@ -52,6 +52,7 @@ import net.ouftech.whobringswhat.commons.Logger;
 import net.ouftech.whobringswhat.eventcontent.EventContentActivity;
 import net.ouftech.whobringswhat.model.Event;
 import net.ouftech.whobringswhat.model.FirestoreManager;
+import net.ouftech.whobringswhat.model.RealTimeDBManager;
 import net.ouftech.whobringswhat.model.User;
 
 import java.util.ArrayList;
@@ -116,6 +117,7 @@ public class EventsListActivity extends BaseActivity {
     private void init() {
         Fabric.with(this);
         FirestoreManager.init();
+        RealTimeDBManager.init();
 
         FirebaseDynamicLinks.getInstance()
                 .getDynamicLink(getIntent())
@@ -318,6 +320,19 @@ public class EventsListActivity extends BaseActivity {
 
         updateLoginMenu();
         Crashlytics.setUserIdentifier(firebaseUser.getUid());
+
+
+        RealTimeDBManager.initWithFirebaseUser(firebaseUser, new FirestoreManager.UserQueryListener() {
+            @Override
+            public void onSuccess(@NonNull User user) {
+                Logger.d(getLogTag(), "RealtimeDB login finished");
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Logger.e(getLogTag(), String.format("Error while fetching or creating user %s", firebaseUser.getUid()), e);
+            }
+        }, true);
 
         FirestoreManager.initWithFirebaseUser(firebaseUser, new FirestoreManager.UserQueryListener() {
             @Override
