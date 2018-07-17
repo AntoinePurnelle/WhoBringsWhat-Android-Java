@@ -28,7 +28,7 @@ import net.ouftech.whobringswhat.eventslist.EventsListActivity;
 /**
  * Implementation of App Widget functionality.
  */
-public class WhoWringsWhatWidget extends AppWidgetProvider {
+public class WhoBringsWhatWidget extends AppWidgetProvider {
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {

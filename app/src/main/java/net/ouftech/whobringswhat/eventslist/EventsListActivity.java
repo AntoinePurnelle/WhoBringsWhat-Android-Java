@@ -16,6 +16,8 @@
 
 package net.ouftech.whobringswhat.eventslist;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -46,6 +48,7 @@ import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 
 import net.ouftech.whobringswhat.EventEditActivity;
 import net.ouftech.whobringswhat.R;
+import net.ouftech.whobringswhat.WhoBringsWhatWidget;
 import net.ouftech.whobringswhat.commons.BaseActivity;
 import net.ouftech.whobringswhat.commons.CollectionUtils;
 import net.ouftech.whobringswhat.commons.Logger;
@@ -453,6 +456,14 @@ public class EventsListActivity extends BaseActivity {
             SharedPreferences.Editor editor = getApplication().getSharedPreferences(SHARED_PREFS_NAME, MODE_PRIVATE).edit();
             editor.putString(UPCOMING_EVENTS_SHARED_PREF, events);
             editor.apply();
+
+            Intent intent = new Intent(EventsListActivity.this, WhoBringsWhatWidget.class);
+            intent.setAction(AppWidgetManager.ACTION_APPWIDGET_UPDATE);
+            AppWidgetManager widgetManager = AppWidgetManager.getInstance(this);
+            int[] ids = widgetManager.getAppWidgetIds(new ComponentName(getApplication(), WhoBringsWhatWidget.class));
+
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids);
+            sendBroadcast(intent);
         }
     }
 
