@@ -41,6 +41,7 @@ import net.ouftech.whobringswhat.commons.Logger;
 import net.ouftech.whobringswhat.model.Contribution;
 import net.ouftech.whobringswhat.model.Event;
 import net.ouftech.whobringswhat.model.FirestoreManager;
+import net.ouftech.whobringswhat.model.RealTimeDBManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -102,16 +103,16 @@ public class EventContentActivity extends BaseActivity {
             getSupportActionBar().setTitle(event.getName());
 
         if (!isTablet())
-        rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                if (dy > 0 )
-                    fab.hide();
-                else
-                    fab.show();
-            }
-        });
+            rv.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    if (dy > 0)
+                        fab.hide();
+                    else
+                        fab.show();
+                }
+            });
     }
 
     private void loadContributions() {
@@ -165,7 +166,7 @@ public class EventContentActivity extends BaseActivity {
         });
     }
 
-    private ContributionsSection.ContributionClickListener contributionClickListener =  new ContributionsSection.ContributionClickListener() {
+    private ContributionsSection.ContributionClickListener contributionClickListener = new ContributionsSection.ContributionClickListener() {
         @Override
         public void onEditContributionClicked(int position, String type) {
             Intent intent = new Intent(EventContentActivity.this, ContributionEditActivity.class);
@@ -213,9 +214,11 @@ public class EventContentActivity extends BaseActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_event_content, menu);
 
-        boolean canDelete = event.getOwner() != null
+        boolean canDelete = TextUtils.equals(RealTimeDBManager.getUserId(), event.getOwner());
+        /*boolean canDelete = event.getOwner() != null
                 && FirestoreManager.getCurrentUser() != null
-                && TextUtils.equals(event.getOwner().getId(), FirestoreManager.getCurrentUser().getFirebaseId());
+                && TextUtils.equals(event.getOwner().getId(), FirestoreManager.getCurrentUser().getFirebaseId());*/
+
         menu.findItem(R.id.action_delete_event).setVisible(canDelete);
 
 
@@ -271,7 +274,22 @@ public class EventContentActivity extends BaseActivity {
 
     private void leaveEvent() {
         setProgressBarVisible(true);
-        event.getUsers().remove(FirestoreManager.getCurrentUser().getFirebaseId());
+        RealTimeDBManager.removeCurrentUserFromEvent(event, new FirestoreManager.SimpleQueryListener() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                finish();
+                setProgressBarVisible(false);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Snackbar.make(rv, R.string.an_error_occurred, Snackbar.LENGTH_LONG).show();
+                setProgressBarVisible(false);
+                Logger.w(getLogTag(), "Error while leaving event", e);
+            }
+        });
+
+        /*event.getUsers().remove(FirestoreManager.getCurrentUser().getFirebaseId());
         FirestoreManager.updateEvent(event, new FirestoreManager.SimpleQueryListener() {
             @Override
             public void onSuccess(Void aVoid) {
@@ -284,12 +302,12 @@ public class EventContentActivity extends BaseActivity {
                 Snackbar.make(rv, R.string.an_error_occurred, Snackbar.LENGTH_LONG).show();
                 setProgressBarVisible(false);
             }
-        });
+        });*/
     }
 
     private void deleteEvent() {
         setProgressBarVisible(true);
-        FirestoreManager.deleteEvent(event, new FirestoreManager.SimpleQueryListener() {
+        RealTimeDBManager.deleteEvent(event, new FirestoreManager.SimpleQueryListener() {
             @Override
             public void onSuccess(Void aVoid) {
                 finish();
@@ -302,6 +320,20 @@ public class EventContentActivity extends BaseActivity {
                 setProgressBarVisible(false);
             }
         });
+
+        /*FirestoreManager.deleteEvent(event, new FirestoreManager.SimpleQueryListener() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                finish();
+                setProgressBarVisible(false);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                Snackbar.make(rv, R.string.an_error_occurred, Snackbar.LENGTH_LONG).show();
+                setProgressBarVisible(false);
+            }
+        });*/
     }
 
     @OnClick(R.id.event_content_fab)

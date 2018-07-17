@@ -154,7 +154,33 @@ public class EventsListActivity extends BaseActivity {
 
     private void openPendingEvent(String id) {
         setProgressBarVisible(true);
-        FirestoreManager.fetchEventById(id, new FirestoreManager.EventQueryListener() {
+
+        RealTimeDBManager.fetchEventById(id, new FirestoreManager.EventQueryListener() {
+            @Override
+            public void onSuccess(@NonNull Event event) {
+                setProgressBarVisible(false);
+                RealTimeDBManager.addCurrentUserToEvent(event, new FirestoreManager.SimpleQueryListener() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        logd("User added to event");
+                    }
+
+                    @Override
+                    public void onFailure(Exception e) {
+                        logw("Could not add user to event", e);
+                    }
+                });
+                openEvent(event);
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                showWarning(R.string.an_error_occurred);
+                setProgressBarVisible(false);
+            }
+        });
+
+        /*FirestoreManager.fetchEventById(id, new FirestoreManager.EventQueryListener() {
             @Override
             public void onSuccess(@NonNull Event event) {
                 setProgressBarVisible(false);
@@ -178,7 +204,7 @@ public class EventsListActivity extends BaseActivity {
                 showWarning(R.string.an_error_occurred);
                 setProgressBarVisible(false);
             }
-        });
+        });*/
     }
 
     /**

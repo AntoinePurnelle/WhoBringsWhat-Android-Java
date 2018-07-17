@@ -299,7 +299,7 @@ public class FirestoreManager {
             protected Void doInBackground(Void... voids) {
                 DocumentReference documentReference = db.collection(EVENTS_COLLECTIONS_NAME).document();
                 event.setId(documentReference.getId());
-                event.setOwner(db.collection(USERS_COLLECTIONS_NAME).document(currentUser.getFirebaseId()));
+                event.setOwnerDocumentReference(db.collection(USERS_COLLECTIONS_NAME).document(currentUser.getFirebaseId()));
                 HashMap<String, Long> users = new HashMap<>();
                 users.put(currentUser.getFirebaseId(), event.getTime());
                 event.setUsers(users);
@@ -336,7 +336,6 @@ public class FirestoreManager {
             }
         }.execute();
     }
-
 
     /**
      * Deletes the  {@link Event} document from Firestore.<br/>

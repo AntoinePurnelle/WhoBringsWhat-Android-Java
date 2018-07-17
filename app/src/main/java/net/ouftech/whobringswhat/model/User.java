@@ -105,6 +105,14 @@ public class User extends BaseModel {
             events.add(eventId);
     }
 
+    public void removeEvent(@NonNull String eventId) {
+        if (events == null)
+            return;
+
+        if (events.contains(eventId))
+            events.remove(eventId);
+    }
+
     @Override
     public String toString() {
         return "User{" +

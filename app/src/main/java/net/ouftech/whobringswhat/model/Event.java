@@ -49,7 +49,8 @@ public class Event implements Parcelable, Comparable<Event> {
     private String budget;
     private CollectionReference contributions;
     private HashMap<String, Long> users;
-    private DocumentReference owner; // User
+    // private DocumentReference owner; // User
+    private String owner;
 
     public Event() {
         users = new HashMap<>();
@@ -62,7 +63,7 @@ public class Event implements Parcelable, Comparable<Event> {
         this.contributions = contributions;
     }
 
-    public Event(String name, @Nullable String description, long time, long endTime, @Nullable String location, int servings, boolean appetizer, boolean starter, boolean main, boolean dessert, @Nullable String type, @Nullable String budget, HashMap<String, Long> users, DocumentReference owner) {
+    public Event(String name, @Nullable String description, long time, long endTime, @Nullable String location, int servings, boolean appetizer, boolean starter, boolean main, boolean dessert, @Nullable String type, @Nullable String budget, HashMap<String, Long> users, String owner) {
         this.name = name;
         this.description = description;
         this.time = time;
@@ -73,6 +74,24 @@ public class Event implements Parcelable, Comparable<Event> {
         this.budget = budget;
         this.users = users;
         this.owner = owner;
+        this.courses = new HashMap<>();
+        this.courses.put(Contribution.CONTRIBUTION_TYPE_APPETIZER, appetizer);
+        this.courses.put(Contribution.CONTRIBUTION_TYPE_STARTER, starter);
+        this.courses.put(Contribution.CONTRIBUTION_TYPE_MAIN, main);
+        this.courses.put(Contribution.CONTRIBUTION_TYPE_DESSERT, dessert);
+    }
+
+    public Event(String name, @Nullable String description, long time, long endTime, @Nullable String location, int servings, boolean appetizer, boolean starter, boolean main, boolean dessert, @Nullable String type, @Nullable String budget, HashMap<String, Long> users, DocumentReference owner) {
+        this.name = name;
+        this.description = description;
+        this.time = time;
+        this.endTime = endTime;
+        this.location = location;
+        this.servings = servings;
+        this.type = type;
+        this.budget = budget;
+        this.users = users;
+        // TODO uncomment this.owner = owner;
         this.courses = new HashMap<>();
         this.courses.put(Contribution.CONTRIBUTION_TYPE_APPETIZER, appetizer);
         this.courses.put(Contribution.CONTRIBUTION_TYPE_STARTER, starter);
@@ -225,12 +244,16 @@ public class Event implements Parcelable, Comparable<Event> {
         this.users = users;
     }
 
-    public DocumentReference getOwner() {
+    public String getOwner() {
         return owner;
     }
 
-    public void setOwner(DocumentReference owner) {
+    public void setOwner(String owner) {
         this.owner = owner;
+    }
+
+    public void setOwnerDocumentReference(DocumentReference owner) {
+        // TODO uncomment this.owner = owner;
     }
 
     @Override
@@ -248,7 +271,7 @@ public class Event implements Parcelable, Comparable<Event> {
                 ",\n budget=" + budget +
                 ",\n contributions=" + contributions +
                 ",\n users=" + users +
-                ",\n owner=" + (owner != null ? owner.getId() : "null") +
+                ",\n owner=" + owner +
                 "\n}";
     }
 
@@ -264,7 +287,8 @@ public class Event implements Parcelable, Comparable<Event> {
         type = in.readString();
         budget = in.readString();
         users = (HashMap) in.readValue(HashMap.class.getClassLoader());
-        owner = FirestoreManager.getUserReferenceForId(in.readString());
+        owner = in.readString();
+        // TODO uncomment owner = FirestoreManager.getUserReferenceForId(in.readString());
     }
 
     @Override
@@ -285,7 +309,7 @@ public class Event implements Parcelable, Comparable<Event> {
         dest.writeString(type);
         dest.writeString(budget);
         dest.writeValue(users);
-        dest.writeString(owner != null ? owner.getId() : null);
+        dest.writeString(owner);
     }
 
     @SuppressWarnings("unused")

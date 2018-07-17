@@ -164,6 +164,71 @@ public class RealTimeDBManager {
         }.execute();
     }
 
+    /**
+     * Remove the given event from the current user's events list
+     *
+     * @param event Event to remove
+     * @param listener Query Listener for success and failure callbacks
+     */
+    public static void removeCurrentUserFromEvent(Event event, FirestoreManager.SimpleQueryListener listener) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                if (event.getId() == null) {
+                    listener.onFailure(new NullPointerException(String.format("Id of event %s is null. Cannot update", event)));
+                } else {
+                    currentUser.removeEvent(event.getId());
+                    saveUser(currentUser, new FirestoreManager.UserQueryListener() {
+                        @Override
+                        public void onSuccess(@NonNull User user) {
+                            Logger.d(getLogTag(), String.format("Event %s removed from user %s", event, userId));
+                            currentUser = user;
+                            listener.onSuccess(null);
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            Logger.w(getLogTag(), String.format("Error while removing event %s from user %s", event, userId), e, false);
+                            listener.onFailure(e);
+                        }
+                    });
+                }
+                return null;
+            }
+        }.execute();
+    }
+
+    /**
+     * Adds the given event to the current user's events list
+     *
+     * @param event Event to add
+     * @param listener Query Listener for success and failure callbacks
+     */
+    public static void addCurrentUserToEvent(Event event, FirestoreManager.SimpleQueryListener listener) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                if (event.getId() == null) {
+                    listener.onFailure(new NullPointerException(String.format("Id of event %s is null. Cannot update", event)));
+                } else {
+                    currentUser.addEvent(event.getId());
+                    saveUser(currentUser, new FirestoreManager.UserQueryListener() {
+                        @Override
+                        public void onSuccess(@NonNull User user) {
+                            Logger.d(getLogTag(), String.format("Event %s added to user %s", event, userId));
+                        }
+
+                        @Override
+                        public void onFailure(Exception e) {
+                            Logger.w(getLogTag(), String.format("Error while adding event %s to user %s", event, userId), e);
+                        }
+                    });
+                }
+                return null;
+            }
+        }.execute();
+    }
+
     public static void logout() {
         Logger.d(getLogTag(), "Setting currentUser to null");
         currentUser = null;
@@ -283,6 +348,8 @@ public class RealTimeDBManager {
             @Override
             protected Void doInBackground(Void... voids) {
                 String eventId = eventsRef.push().getKey();
+                event.setId(eventId);
+                event.setOwner(userId);
                 eventsRef.child(eventId).setValue(event)
                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
@@ -314,8 +381,72 @@ public class RealTimeDBManager {
         }.execute();
     }
 
+    /**
+     * Updates the  {@link Event} document to Firestore.<br/>
+     * CAUTION: This method will save every field of the {@link Event} object to save them in Firestore, even the NULL ones!<br/>
+     * Calling this method will replace anything stored on Firestore for that document.
+     *
+     * @param event    {@link Event} to save as a Firestore document
+     * @param listener Query Listener for success and failure callbacks
+     */
+    public static void updateEvent(@NonNull Event event, @NonNull FirestoreManager.SimpleQueryListener listener) {
+        new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... voids) {
+                if (event.getId() == null) {
+                    listener.onFailure(new NullPointerException(String.format("Id of event %s is null. Cannot update", event)));
+                } else {
+                    eventsRef.child(event.getId()).setValue(event)
+                            .addOnSuccessListener(listener::onSuccess)
+                            .addOnFailureListener(listener::onFailure);
+                }
+                return null;
+            }
+        }.execute();
+    }
+
+    /**
+     * Deletes the  {@link Event} document from Firestore.<br/>
+     * Calling this method will remove anything stored on Firestore for that document.
+     *
+     * @param event    {@link Event} to delete from Firestore
+     * @param listener Query Listener for success and failure callbacks
+     */
+    public static void deleteEvent(@NonNull Event event, @NonNull FirestoreManager.SimpleQueryListener listener) {
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                if (event.getId() == null) {
+                    listener.onFailure(new NullPointerException(String.format("Id of event %s is null. Cannot delete", event)));
+                } else {
+                    eventsRef.child(event.getId()).removeValue()
+                            .addOnSuccessListener(listener::onSuccess)
+                            .addOnFailureListener(listener::onFailure);
+                }
+                return null;
+            }
+        }.execute();
+    }
+
     // endregion Events
 
+
+    public static User getCurrentUser() {
+        return currentUser;
+    }
+
+    public static void setCurrentUser(User currentUser) {
+        RealTimeDBManager.currentUser = currentUser;
+    }
+
+    public static String getUserId() {
+        return userId;
+    }
+
+    public static void setUserId(String userId) {
+        RealTimeDBManager.userId = userId;
+    }
 
     @NonNull
     private static String getLogTag() {

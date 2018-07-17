@@ -269,7 +269,7 @@ public class EventEditActivity extends BaseActivity {
             });*/
         } else {
             Logger.d(getLogTag(), String.format("Updating event %s", event));
-            FirestoreManager.updateEvent(event, new FirestoreManager.SimpleQueryListener() {
+            RealTimeDBManager.updateEvent(event, new FirestoreManager.SimpleQueryListener() {
                 @Override
                 public void onSuccess(Void aVoid) {
                     Logger.d(getLogTag(), "Event saved");
@@ -284,6 +284,21 @@ public class EventEditActivity extends BaseActivity {
                     showWarning(R.string.an_error_occurred);
                 }
             });
+            /*FirestoreManager.updateEvent(event, new FirestoreManager.SimpleQueryListener() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Logger.d(getLogTag(), "Event saved");
+                    Toast.makeText(EventEditActivity.this, R.string.event_saved, Toast.LENGTH_LONG).show();
+                    getIntent().putExtra(EVENT_EXTRA, event);
+                    setResult(RESULT_OK, getIntent());
+                    finish();
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    showWarning(R.string.an_error_occurred);
+                }
+            });*/
         }
     }
 
