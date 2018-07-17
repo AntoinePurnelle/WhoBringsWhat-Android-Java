@@ -123,38 +123,11 @@ public class EventContentActivity extends BaseActivity {
         else
             contributionsLists.clear();
 
-        FirestoreManager.fetchContributionsForEvent(event, new FirestoreManager.ContributionsQueryListener() {
+        RealTimeDBManager.fetchEventById(event.getId(), new FirestoreManager.EventQueryListener() {
             @Override
-            public void onSuccess(@NonNull List<Contribution> contributions) {
-                Logger.d(getLogTag(), String.format("Fetched %s contributions", contributions.size()));
-
-                appetizerContributions = new ArrayList<>();
-                contributionsLists.put(CONTRIBUTION_TYPE_APPETIZER, appetizerContributions);
-                starterContributions = new ArrayList<>();
-                contributionsLists.put(CONTRIBUTION_TYPE_STARTER, starterContributions);
-                mainContributions = new ArrayList<>();
-                contributionsLists.put(CONTRIBUTION_TYPE_MAIN, mainContributions);
-                dessertContributions = new ArrayList<>();
-                contributionsLists.put(CONTRIBUTION_TYPE_DESSERT, dessertContributions);
-
-                for (Contribution contribution : contributions) {
-                    String type = contribution.getType();
-                    switch (type) {
-                        case CONTRIBUTION_TYPE_APPETIZER:
-                            appetizerContributions.add(contribution);
-                            break;
-                        case Contribution.CONTRIBUTION_TYPE_STARTER:
-                            starterContributions.add(contribution);
-                            break;
-                        case Contribution.CONTRIBUTION_TYPE_MAIN:
-                            mainContributions.add(contribution);
-                            break;
-                        case Contribution.CONTRIBUTION_TYPE_DESSERT:
-                            dessertContributions.add(contribution);
-                            break;
-                    }
-                }
-
+            public void onSuccess(@NonNull Event event) {
+                EventContentActivity.this.event = event;
+                sortContributions(event.getContributionsList());
                 displayEventContent();
             }
 
@@ -164,6 +137,50 @@ public class EventContentActivity extends BaseActivity {
                 Snackbar.make(rv, R.string.an_error_occurred, Snackbar.LENGTH_LONG).show();
             }
         });
+
+        /*FirestoreManager.fetchContributionsForEvent(event, new FirestoreManager.ContributionsQueryListener() {
+            @Override
+            public void onSuccess(@NonNull List<Contribution> contributions) {
+                Logger.d(getLogTag(), String.format("Fetched %s contributions", contributions.size()));
+                sortContributions(contributions);
+                displayEventContent();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                setProgressBarVisible(false);
+                Snackbar.make(rv, R.string.an_error_occurred, Snackbar.LENGTH_LONG).show();
+            }
+        });*/
+    }
+
+    private void sortContributions(List<Contribution> contributions) {
+        appetizerContributions = new ArrayList<>();
+        contributionsLists.put(CONTRIBUTION_TYPE_APPETIZER, appetizerContributions);
+        starterContributions = new ArrayList<>();
+        contributionsLists.put(CONTRIBUTION_TYPE_STARTER, starterContributions);
+        mainContributions = new ArrayList<>();
+        contributionsLists.put(CONTRIBUTION_TYPE_MAIN, mainContributions);
+        dessertContributions = new ArrayList<>();
+        contributionsLists.put(CONTRIBUTION_TYPE_DESSERT, dessertContributions);
+
+        for (Contribution contribution : contributions) {
+            String type = contribution.getType();
+            switch (type) {
+                case CONTRIBUTION_TYPE_APPETIZER:
+                    appetizerContributions.add(contribution);
+                    break;
+                case Contribution.CONTRIBUTION_TYPE_STARTER:
+                    starterContributions.add(contribution);
+                    break;
+                case Contribution.CONTRIBUTION_TYPE_MAIN:
+                    mainContributions.add(contribution);
+                    break;
+                case Contribution.CONTRIBUTION_TYPE_DESSERT:
+                    dessertContributions.add(contribution);
+                    break;
+            }
+        }
     }
 
     private ContributionsSection.ContributionClickListener contributionClickListener = new ContributionsSection.ContributionClickListener() {
@@ -171,7 +188,7 @@ public class EventContentActivity extends BaseActivity {
         public void onEditContributionClicked(int position, String type) {
             Intent intent = new Intent(EventContentActivity.this, ContributionEditActivity.class);
             intent.putExtra(ContributionEditActivity.TYPE_EXTRA, type);
-            intent.putExtra(ContributionEditActivity.CONTRIBUTION_EXTRA, getContribution(type, position));
+            intent.putExtra(ContributionEditActivity.CONTRIBUTION_EXTRA, event.getContributionsList().indexOf(getContribution(type, position)));
             intent.putExtra(ContributionEditActivity.EVENT_EXTRA, event);
             startActivityForResult(intent, CONTRIBUTION_EDIT_REQUEST_CODE);
         }

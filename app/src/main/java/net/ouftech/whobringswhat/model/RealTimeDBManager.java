@@ -432,6 +432,34 @@ public class RealTimeDBManager {
     // endregion Events
 
 
+    // region Contribution
+
+
+    /**
+     * Saves {@link Contribution} document to Firestore.<br/>
+     * CAUTION: This method will save every field of the {@link Contribution} object to save them in Firestore, even the NULL ones!<br/>
+     * Calling this method will replace anything stored on Firestore for that document.
+     *
+     * @param event        {@link Event} in which to save the Contribution
+     * @param contribution {@link Contribution} to save as a Firestore document
+     * @param listener     Query Listener for success and failure callbacks
+     */
+    public static void addContribution(@NonNull Event event, @NonNull Contribution contribution, @NonNull FirestoreManager.SimpleQueryListener listener) {
+        new AsyncTask<Void, Void, Void>() {
+
+            @Override
+            protected Void doInBackground(Void... voids) {
+                event.addContribution(contribution);
+                updateEvent(event, listener);
+                return null;
+            }
+        }.execute();
+    }
+
+
+    // endregion Contributions
+
+
     public static User getCurrentUser() {
         return currentUser;
     }

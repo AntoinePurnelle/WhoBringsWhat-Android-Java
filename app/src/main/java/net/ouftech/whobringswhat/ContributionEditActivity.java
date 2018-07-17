@@ -38,6 +38,7 @@ import net.ouftech.whobringswhat.commons.Logger;
 import net.ouftech.whobringswhat.model.Contribution;
 import net.ouftech.whobringswhat.model.Event;
 import net.ouftech.whobringswhat.model.FirestoreManager;
+import net.ouftech.whobringswhat.model.RealTimeDBManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,8 +99,11 @@ public class ContributionEditActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
 
         if (savedInstanceState == null) {
-            contribution = getIntent().getParcelableExtra(CONTRIBUTION_EXTRA);
             event = getIntent().getParcelableExtra(EVENT_EXTRA);
+            int position = getIntent().getIntExtra(CONTRIBUTION_EXTRA, -1);
+            if (position >= 0)
+                contribution = event.getContributionsList().get(position);
+
 
             if (contribution != null) { // First onCreate with an existing Contribution
                 buttonRes = R.string.save_contribution;
@@ -193,7 +197,7 @@ public class ContributionEditActivity extends BaseActivity {
         setProgressBarVisible(true);
         if (contributionCreation) {
             Logger.d(getLogTag(), String.format("Creating contribution %s", contribution));
-            FirestoreManager.addContribution(event, contribution, new FirestoreManager.SimpleQueryListener() {
+            RealTimeDBManager.addContribution(event, contribution, new FirestoreManager.SimpleQueryListener() {
                 @Override
                 public void onSuccess(Void aVoid) {
                     Logger.d(getLogTag(), "Contribution created");
@@ -208,9 +212,24 @@ public class ContributionEditActivity extends BaseActivity {
                     showWarning(R.string.an_error_occurred);
                 }
             });
+            /*FirestoreManager.addContribution(event, contribution, new FirestoreManager.SimpleQueryListener() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Logger.d(getLogTag(), "Contribution created");
+                    setProgressBarVisible(false);
+                    Toast.makeText(ContributionEditActivity.this, R.string.contribution_created, Toast.LENGTH_LONG).show();
+                    finishWithSuccess();
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    setProgressBarVisible(false);
+                    showWarning(R.string.an_error_occurred);
+                }
+            });*/
         } else {
-            Logger.d(getLogTag(), String.format("Updating contribution %s", event));
-            FirestoreManager.updateContribution(event, contribution, new FirestoreManager.SimpleQueryListener() {
+            Logger.d(getLogTag(), String.format("Updating contribution %s", contribution));
+            RealTimeDBManager.updateEvent(event, new FirestoreManager.SimpleQueryListener() {
                 @Override
                 public void onSuccess(Void aVoid) {
                     Logger.d(getLogTag(), "Contribution saved");
@@ -225,6 +244,21 @@ public class ContributionEditActivity extends BaseActivity {
                     showWarning(R.string.an_error_occurred);
                 }
             });
+            /*FirestoreManager.updateContribution(event, contribution, new FirestoreManager.SimpleQueryListener() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Logger.d(getLogTag(), "Contribution saved");
+                    setProgressBarVisible(false);
+                    Toast.makeText(ContributionEditActivity.this, R.string.contribution_saved, Toast.LENGTH_LONG).show();
+                    finishWithSuccess();
+                }
+
+                @Override
+                public void onFailure(Exception e) {
+                    setProgressBarVisible(false);
+                    showWarning(R.string.an_error_occurred);
+                }
+            });*/
         }
     }
 
@@ -299,7 +333,24 @@ public class ContributionEditActivity extends BaseActivity {
 
     private void deleteContribution() {
         setProgressBarVisible(true);
-        FirestoreManager.deleteContribution(event, contribution, new FirestoreManager.SimpleQueryListener() {
+
+        event.getContributionsList().remove(contribution);
+        RealTimeDBManager.updateEvent(event, new FirestoreManager.SimpleQueryListener() {
+            @Override
+            public void onSuccess(Void aVoid) {
+                Logger.d(getLogTag(), "Contribution removed");
+                setProgressBarVisible(false);
+                finishWithSuccess();
+            }
+
+            @Override
+            public void onFailure(Exception e) {
+                setProgressBarVisible(false);
+                showWarning(R.string.an_error_occurred);
+            }
+        });
+
+        /*FirestoreManager.deleteContribution(event, contribution, new FirestoreManager.SimpleQueryListener() {
             @Override
             public void onSuccess(Void aVoid) {
                 setProgressBarVisible(false);
@@ -311,7 +362,7 @@ public class ContributionEditActivity extends BaseActivity {
                 Snackbar.make(nameEt, R.string.an_error_occurred, Snackbar.LENGTH_LONG).show();
                 setProgressBarVisible(false);
             }
-        });
+        });*/
     }
 
     private void setProgressBarVisible(final boolean visible) {

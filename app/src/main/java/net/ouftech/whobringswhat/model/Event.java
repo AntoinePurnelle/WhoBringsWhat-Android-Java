@@ -27,7 +27,9 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.PropertyName;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class Event implements Parcelable, Comparable<Event> {
 
@@ -48,6 +50,7 @@ public class Event implements Parcelable, Comparable<Event> {
     @Nullable
     private String budget;
     private CollectionReference contributions;
+    private List<Contribution> contributionsList;
     private HashMap<String, Long> users;
     // private DocumentReference owner; // User
     private String owner;
@@ -79,6 +82,7 @@ public class Event implements Parcelable, Comparable<Event> {
         this.courses.put(Contribution.CONTRIBUTION_TYPE_STARTER, starter);
         this.courses.put(Contribution.CONTRIBUTION_TYPE_MAIN, main);
         this.courses.put(Contribution.CONTRIBUTION_TYPE_DESSERT, dessert);
+        this.contributionsList = new ArrayList<>();
     }
 
     public Event(String name, @Nullable String description, long time, long endTime, @Nullable String location, int servings, boolean appetizer, boolean starter, boolean main, boolean dessert, @Nullable String type, @Nullable String budget, HashMap<String, Long> users, DocumentReference owner) {
@@ -97,6 +101,7 @@ public class Event implements Parcelable, Comparable<Event> {
         this.courses.put(Contribution.CONTRIBUTION_TYPE_STARTER, starter);
         this.courses.put(Contribution.CONTRIBUTION_TYPE_MAIN, main);
         this.courses.put(Contribution.CONTRIBUTION_TYPE_DESSERT, dessert);
+        this.contributionsList = new ArrayList<>();
     }
 
     public static Event fromDocument(@NonNull DocumentSnapshot documentSnapshot) {
@@ -244,6 +249,32 @@ public class Event implements Parcelable, Comparable<Event> {
         this.users = users;
     }
 
+    public List<Contribution> getContributionsList() {
+        if (contributionsList == null)
+            contributionsList = new ArrayList<>();
+        return contributionsList;
+    }
+
+    public void setContributionsList(List<Contribution> contributionsList) {
+        this.contributionsList = contributionsList;
+    }
+
+    public void addContribution(Contribution contribution) {
+        if (contributionsList == null)
+            contributionsList = new ArrayList<>();
+
+        if (!contributionsList.contains(contribution))
+        contributionsList.add(contribution);
+    }
+
+    public void removeContribution(Contribution contribution) {
+        if (contributionsList == null)
+            return;
+
+        if (contributionsList.contains(contribution))
+            contributionsList.remove(contribution);
+    }
+
     public String getOwner() {
         return owner;
     }
@@ -289,6 +320,7 @@ public class Event implements Parcelable, Comparable<Event> {
         users = (HashMap) in.readValue(HashMap.class.getClassLoader());
         owner = in.readString();
         // TODO uncomment owner = FirestoreManager.getUserReferenceForId(in.readString());
+        this.contributionsList = in.createTypedArrayList(Contribution.CREATOR);
     }
 
     @Override
@@ -310,6 +342,7 @@ public class Event implements Parcelable, Comparable<Event> {
         dest.writeString(budget);
         dest.writeValue(users);
         dest.writeString(owner);
+        dest.writeTypedList(this.contributionsList);
     }
 
     @SuppressWarnings("unused")
