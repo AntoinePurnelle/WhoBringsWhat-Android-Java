@@ -449,6 +449,7 @@ public class RealTimeDBManager {
 
             @Override
             protected Void doInBackground(Void... voids) {
+                contribution.setUser(userId);
                 event.addContribution(contribution);
                 updateEvent(event, listener);
                 return null;

@@ -429,7 +429,7 @@ public class FirestoreManager {
                         .collection(EVENTS_COLLECTIONS_NAME).document(event.getId())
                         .collection(CONTRIBUTIONS_COLLECTIONS_NAME).document();
                 contribution.setId(documentReference.getId());
-                contribution.setUser(db.collection(USERS_COLLECTIONS_NAME).document(currentUser.getFirebaseId()));
+                // todo uncomment contribution.setUser(db.collection(USERS_COLLECTIONS_NAME).document(currentUser.getFirebaseId()));
 
                 documentReference
                         .set(contribution)
@@ -607,7 +607,7 @@ public class FirestoreManager {
                         11, 11, "plates",
                         "main",
                         "Comment C1E3",
-                        db.collection(USERS_COLLECTIONS_NAME).document("apu+user2@ouftech.net"),
+                        null, // todo uncomment db.collection(USERS_COLLECTIONS_NAME).document("apu+user2@ouftech.net"),
                         "User 2",
                         true
                 );

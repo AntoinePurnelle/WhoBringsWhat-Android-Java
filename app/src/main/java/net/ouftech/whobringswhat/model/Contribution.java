@@ -22,7 +22,6 @@ import android.os.Parcelable;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.PropertyName;
 
@@ -50,14 +49,14 @@ public class Contribution implements Parcelable {
     private String type;
     @Nullable
     private String comment;
-    private DocumentReference user;
+    private String user;
     private String contributor;
     private boolean isDrink;
 
     public Contribution() {
     }
 
-    public Contribution(String name, int servings, int quantity, @Nullable String unit, String type, @Nullable String comment, DocumentReference user, String contributor, boolean isDrink) {
+    public Contribution(String name, int servings, int quantity, @Nullable String unit, String type, @Nullable String comment, String user, String contributor, boolean isDrink) {
         this.name = name;
         this.servings = servings;
         this.quantity = quantity;
@@ -136,11 +135,11 @@ public class Contribution implements Parcelable {
         this.comment = comment;
     }
 
-    public DocumentReference getUser() {
+    public String getUser() {
         return user;
     }
 
-    public void setUser(DocumentReference user) {
+    public void setUser(String user) {
         this.user = user;
     }
 
@@ -200,7 +199,7 @@ public class Contribution implements Parcelable {
                 ",\n unit='" + unit + '\'' +
                 ",\n type='" + type + '\'' +
                 ",\n comment='" + comment + '\'' +
-                ",\n user=" + ((user != null) ? user.getId() : "null") +
+                ",\n user=" + user +
                 ",\n contributor=" + contributor +
                 ",\n isDrink=" + isDrink +
                 "\n}";
@@ -214,7 +213,7 @@ public class Contribution implements Parcelable {
         unit = in.readString();
         type = in.readString();
         comment = in.readString();
-        user = FirestoreManager.getUserReferenceForId(in.readString());
+        user = in.readString(); // TODO uncomment FirestoreManager.getUserReferenceForId(in.readString());
         contributor = in.readString();
         isDrink = in.readByte() != 0x00;
     }
@@ -233,7 +232,7 @@ public class Contribution implements Parcelable {
         dest.writeString(unit);
         dest.writeString(type);
         dest.writeString(comment);
-        dest.writeString(user != null ? user.getId() : null);
+        dest.writeString(user);
         dest.writeString(contributor);
         dest.writeByte((byte) (isDrink ? 0x01 : 0x00));
     }
