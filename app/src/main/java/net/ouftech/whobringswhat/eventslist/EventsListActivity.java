@@ -119,7 +119,7 @@ public class EventsListActivity extends BaseActivity {
 
     private void init() {
         Fabric.with(this);
-        FirestoreManager.init();
+        //FirestoreManager.init();
         RealTimeDBManager.init();
 
         FirebaseDynamicLinks.getInstance()
@@ -387,7 +387,7 @@ public class EventsListActivity extends BaseActivity {
             }
         }, transformAnonymous);
 
-        FirestoreManager.initWithFirebaseUser(firebaseUser, new FirestoreManager.UserQueryListener() {
+        /*FirestoreManager.initWithFirebaseUser(firebaseUser, new FirestoreManager.UserQueryListener() {
             @Override
             public void onSuccess(@NonNull User user) {
                 Logger.d(getLogTag(), "Firestore login finished");
@@ -397,7 +397,7 @@ public class EventsListActivity extends BaseActivity {
             public void onFailure(Exception e) {
                 Logger.e(getLogTag(), String.format("Error while fetching or creating user %s", firebaseUser.getUid()), e);
             }
-        }, transformAnonymous);
+        }, transformAnonymous);*/
         transformAnonymous = false;
 
 
@@ -485,10 +485,10 @@ public class EventsListActivity extends BaseActivity {
                     emptyMessageTextView.setVisibility(View.GONE);
                 }
             }
-        });
 
-        sectionedAdapter.notifyDataSetChanged();
-        setProgressBarVisible(false);
+            sectionedAdapter.notifyDataSetChanged();
+            setProgressBarVisible(false);
+        });
     }
 
     private void openEvent(@NonNull Event event) {

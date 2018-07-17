@@ -119,7 +119,7 @@ public class ContributionEditActivity extends BaseActivity {
         if (contribution == null) {
             contribution = new Contribution();
             contribution.setType(getIntent().getStringExtra(TYPE_EXTRA));
-            contribution.setContributor(FirestoreManager.getCurrentUser().getName());
+            contribution.setContributor(RealTimeDBManager.getCurrentUser().getName());
         }
 
         nameEt.setText(contribution.getName());

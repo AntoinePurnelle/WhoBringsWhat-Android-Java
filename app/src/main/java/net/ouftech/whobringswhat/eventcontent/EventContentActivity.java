@@ -17,6 +17,7 @@
 package net.ouftech.whobringswhat.eventcontent;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.StringRes;
@@ -32,6 +33,10 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 import com.evernote.android.state.State;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.firebase.dynamiclinks.DynamicLink;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
+import com.google.firebase.dynamiclinks.ShortDynamicLink;
 
 import net.ouftech.whobringswhat.ContributionEditActivity;
 import net.ouftech.whobringswhat.EventEditActivity;
@@ -356,7 +361,7 @@ public class EventContentActivity extends BaseActivity {
     @OnClick(R.id.event_content_fab)
     public void onFabClicked() {
         setProgressBarVisible(true);
-        FirestoreManager.getEventLink(event, task -> {
+        getEventLink(event, task -> {
             setProgressBarVisible(false);
             if (!task.isSuccessful()) {
                 showWarning(R.string.an_error_occurred);
@@ -370,6 +375,17 @@ public class EventContentActivity extends BaseActivity {
             startActivity(Intent.createChooser(sendIntent, event.getName()));
         });
 
+    }
+
+    public void getEventLink(@NonNull Event event, @NonNull OnCompleteListener<ShortDynamicLink> listener) {
+        FirebaseDynamicLinks.getInstance().createDynamicLink()
+                .setLink(Uri.parse("https://www.ouftech.net/events/" + event.getId()))
+                .setDynamicLinkDomain("whobringswhat.page.link")
+                // Open links with this app on Android
+                .setAndroidParameters(new DynamicLink.AndroidParameters.Builder("net.ouftech.whobringswhat").build())
+                // Open links with com.example.ios on iOS
+                .setIosParameters(new DynamicLink.IosParameters.Builder("net.ouftech.whobringswhat").build())
+                .buildShortDynamicLink().addOnCompleteListener(listener);
     }
 
     private void showWarning(@StringRes int message) {
