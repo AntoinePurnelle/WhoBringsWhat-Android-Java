@@ -162,6 +162,10 @@ public class Contribution implements Parcelable {
         this.isDrink = isDrink;
     }
 
+    public void setDrink(boolean isDrink) {
+        this.isDrink = isDrink;
+    }
+
     @NonNull
     public String getTypePrint(@NonNull Context context) {
         return getTypePrint(context, type);
